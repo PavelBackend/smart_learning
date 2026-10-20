@@ -1,0 +1,30 @@
+{
+  "words": [
+    {
+      "english": "serendipity",
+      "translations": ["счастливая случайность", "неожиданная удача"],
+      "examples": [
+        {
+          "en": "Finding this café was pure serendipity.",
+          "ru": "Найти это кафе было счастливой случайностью."
+        }
+      ],
+      "part_of_speech": "noun",
+      "note": "Приятная неожиданная находка.",
+      "tags": ["повседневное"]
+    },
+    {
+      "english": "to figure out",
+      "translations": ["разобраться", "понять"],
+      "examples": [
+        {
+          "en": "I need to figure out how this works.",
+          "ru": "Мне нужно разобраться, как это работает."
+        }
+      ],
+      "part_of_speech": "phrasal verb",
+      "note": "Часто означает решить задачу или понять что-либо.",
+      "tags": ["повседневное"]
+    }
+  ]
+}

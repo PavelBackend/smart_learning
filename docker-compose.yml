@@ -1,0 +1,111 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-learning}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-learning_local}
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-learning} -d postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-learning}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-learning_local}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "127.0.0.1:15672:15672"
+
+  vocabulary:
+    build: ./services/vocabulary
+    ports:
+      - "127.0.0.1:8001:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-learning}:${POSTGRES_PASSWORD:-learning_local}@postgres:5432/vocabulary
+    depends_on:
+      postgres: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  practice:
+    build: ./services/practice
+    ports:
+      - "127.0.0.1:8002:8000"
+    environment: &practice_env
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-learning}:${POSTGRES_PASSWORD:-learning_local}@postgres:5432/practice
+      VOCABULARY_URL: http://vocabulary:8000
+    depends_on:
+      postgres: {condition: service_healthy}
+      vocabulary: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  practice-publisher:
+    build: ./services/practice
+    command: ["python", "publisher.py"]
+    environment:
+      <<: *practice_env
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-learning}:${RABBITMQ_PASSWORD:-learning_local}@rabbitmq:5672/%2F
+    depends_on:
+      postgres: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+      practice: {condition: service_healthy}
+    restart: unless-stopped
+
+  insights:
+    build: ./services/insights
+    ports:
+      - "127.0.0.1:8003:8000"
+    environment: &insights_env
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-learning}:${POSTGRES_PASSWORD:-learning_local}@postgres:5432/insights
+      APP_TIMEZONE: Europe/Moscow
+    depends_on:
+      postgres: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  insights-worker:
+    build: ./services/insights
+    command: ["python", "worker.py"]
+    environment:
+      <<: *insights_env
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-learning}:${RABBITMQ_PASSWORD:-learning_local}@rabbitmq:5672/%2F
+    depends_on:
+      postgres: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+      insights: {condition: service_healthy}
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      vocabulary: {condition: service_healthy}
+      practice: {condition: service_healthy}
+      insights: {condition: service_healthy}
+
+volumes:
+  postgres_data:
