@@ -1,3 +1,0 @@
-CREATE DATABASE vocabulary;
-CREATE DATABASE practice;
-CREATE DATABASE insights;

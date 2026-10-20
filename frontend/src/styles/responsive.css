@@ -1,0 +1,374 @@
+@media (max-width: 1180px) {
+  .sidebar {
+    width: 225px;
+    min-width: 225px;
+  }
+  .page-content {
+    padding: 32px 29px 55px;
+  }
+  .topbar {
+    padding: 0 29px;
+  }
+  .hero-copy {
+    width: 62%;
+  }
+  .hero-art {
+    width: 45%;
+  }
+  .art-card-front {
+    right: 5%;
+  }
+  .art-card-back {
+    right: -7%;
+  }
+  .word-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 850px) {
+  .sidebar {
+    width: 70px;
+    min-width: 70px;
+    padding: 22px 10px;
+  }
+  .brand {
+    padding: 0 7px 42px;
+  }
+  .brand > div:last-child,
+  .sidebar-section-title,
+  .nav-item span,
+  .sidebar-bottom {
+    display: none;
+  }
+  .nav-item {
+    justify-content: center;
+    padding: 0;
+  }
+  .nav-item.active:before {
+    left: 0;
+  }
+  .page-content {
+    padding: 27px 23px;
+  }
+  .topbar {
+    padding: 0 23px;
+  }
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dashboard-bottom {
+    grid-template-columns: 1fr 1fr;
+  }
+  .hero-art {
+    opacity: 0.65;
+  }
+  .hero-copy {
+    width: 72%;
+  }
+  .practice-layout,
+  .import-layout {
+    grid-template-columns: 1fr;
+  }
+  .practice-aside,
+  .import-aside {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .practice-note,
+  .privacy-panel {
+    margin-top: 0;
+  }
+  .reset-link {
+    align-self: start;
+  }
+}
+@media (max-width: 620px) {
+  .app-shell {
+    display: block;
+  }
+  .sidebar {
+    position: fixed;
+    left: -270px;
+    width: 245px;
+    min-width: 245px;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+    transition: left 0.2s;
+    padding: 28px 16px;
+  }
+  .sidebar.sidebar-open {
+    left: 0;
+  }
+  .sidebar .brand > div:last-child,
+  .sidebar .sidebar-section-title,
+  .sidebar .nav-item span,
+  .sidebar .sidebar-bottom {
+    display: block;
+  }
+  .sidebar .nav-item {
+    justify-content: start;
+    padding: 0 14px;
+  }
+  .mobile-menu {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: #694ce1;
+    color: #fff;
+    z-index: 40;
+    box-shadow: 0 10px 28px #3a2e8260;
+  }
+  .mobile-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: #14112d66;
+    z-index: 19;
+  }
+  .topbar {
+    height: 57px;
+    padding: 0 18px;
+  }
+  .topbar-right {
+    font-size: 0;
+  }
+  .avatar {
+    margin-left: 8px;
+  }
+  .page-content {
+    padding: 23px 17px 60px;
+  }
+  .page-heading {
+    align-items: start;
+  }
+  .page-heading h1 {
+    font-size: 25px;
+  }
+  .page-heading p {
+    font-size: 11px;
+  }
+  .date-pill {
+    display: none;
+  }
+  .hero-card {
+    min-height: 300px;
+  }
+  .hero-copy {
+    width: 100%;
+    padding: 27px 24px;
+  }
+  .hero-copy h2 {
+    font-size: 25px;
+  }
+  .hero-copy p {
+    max-width: 245px;
+  }
+  .hero-art {
+    width: 60%;
+    opacity: 0.28;
+  }
+  .art-card-front {
+    right: -90px;
+  }
+  .metrics-grid {
+    gap: 9px;
+  }
+  .metric-card {
+    padding: 14px;
+    min-height: 118px;
+  }
+  .metric-label {
+    font-size: 10px;
+  }
+  .metric-value {
+    font-size: 24px;
+  }
+  .metric-icon {
+    width: 29px;
+    height: 29px;
+  }
+  .dashboard-bottom,
+  .quick-links,
+  .word-grid,
+  .practice-aside,
+  .import-aside {
+    grid-template-columns: 1fr;
+  }
+  .activity-panel,
+  .recent-panel {
+    padding: 20px;
+  }
+  .heading-button {
+    font-size: 0;
+    width: 40px;
+    padding: 0;
+  }
+  .heading-button svg {
+    min-width: 18px;
+  }
+  .dictionary-summary {
+    padding: 16px;
+    height: 85px;
+  }
+  .dictionary-summary strong {
+    font-size: 13px;
+  }
+  .dictionary-summary-decor {
+    right: 10px;
+    font-size: 110px;
+    top: -22px;
+  }
+  .dictionary-toolbar {
+    flex-direction: column;
+  }
+  .search-box {
+    width: 100%;
+  }
+  .toolbar-actions {
+    justify-content: space-between;
+  }
+  .toolbar-actions > * {
+    flex: 1;
+  }
+  .mode-row {
+    align-items: start;
+    flex-direction: column;
+  }
+  .question-card {
+    min-height: 260px;
+    padding: 19px;
+  }
+  .question-center h2 {
+    font-size: 35px;
+  }
+  .import-main {
+    padding: 18px;
+  }
+  .prompt-card,
+  .file-links,
+  .dropzone,
+  .file-preview,
+  .import-button,
+  .success-message {
+    margin-left: 0;
+  }
+  .prompt-card {
+    flex-wrap: wrap;
+  }
+  .copy-button {
+    margin-left: 48px;
+  }
+  .step-heading {
+    gap: 10px;
+  }
+  .file-links {
+    flex-wrap: wrap;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .word-modal {
+    padding: 18px;
+  }
+  .back-link {
+    font-size: 0;
+    width: 40px;
+    padding: 0;
+  }
+  .back-link svg {
+    min-width: 17px;
+  }
+}
+.stage-chip {
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.stage-chip:hover {
+  filter: brightness(0.96);
+}
+.hero-art {
+  pointer-events: none;
+}
+@media (max-width: 620px) {
+  .hero-art {
+    display: none;
+  }
+}
+.examples-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+.examples-heading button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: #f2eeff;
+  color: #7052db;
+  border-radius: 7px;
+  padding: 7px 9px;
+  font-size: 10px;
+  font-weight: 800;
+}
+.example-form-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.example-form-row .form-grid {
+  flex: 1;
+}
+.example-remove {
+  border: 0;
+  background: none;
+  color: #aaa7b7;
+  padding: 5px;
+}
+.progress-modal {
+  max-width: 470px;
+}
+.progress-modal > p {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #8c8f9e;
+  margin: -5px 0 20px;
+}
+.progress-fields {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 21px;
+}
+.progress-fields label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.progress-fields select {
+  border: 1px solid #e7e4ef;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #54458e;
+  background: #fff;
+  font: inherit;
+  font-size: 11px;
+  min-width: 155px;
+}
+.progress-fields label {
+  flex-direction: row;
+}

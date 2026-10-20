@@ -11,7 +11,12 @@ import { Dashboard } from "./pages/Dashboard";
 import { Dictionary } from "./pages/Dictionary";
 import { Practice } from "./pages/Practice";
 import { ImportWords } from "./pages/ImportWords";
-import "./styles.css";
+import "./styles/layout.css";
+import "./styles/dashboard.css";
+import "./styles/practice.css";
+import "./styles/dictionary.css";
+import "./styles/import.css";
+import "./styles/responsive.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

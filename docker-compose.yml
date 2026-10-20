@@ -7,7 +7,6 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./infra/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-learning} -d postgres"]
       interval: 3s
@@ -27,14 +26,17 @@ services:
       timeout: 5s
       retries: 20
     ports:
-      - "127.0.0.1:15672:15672"
+      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
 
   vocabulary:
-    build: ./services/vocabulary
+    build:
+      context: .
+      dockerfile: services/vocabulary/Dockerfile
     ports:
-      - "127.0.0.1:8001:8000"
+      - "127.0.0.1:${VOCABULARY_PORT:-8001}:8000"
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-learning}:${POSTGRES_PASSWORD:-learning_local}@postgres:5432/vocabulary
+      POSTGRES_ADMIN_URL: postgresql+psycopg://${POSTGRES_USER:-learning}:${POSTGRES_PASSWORD:-learning_local}@postgres:5432/postgres
     depends_on:
       postgres: {condition: service_healthy}
     healthcheck:
@@ -44,9 +46,11 @@ services:
       retries: 15
 
   practice:
-    build: ./services/practice
+    build:
+      context: .
+      dockerfile: services/practice/Dockerfile
     ports:
-      - "127.0.0.1:8002:8000"
+      - "127.0.0.1:${PRACTICE_PORT:-8002}:8000"
     environment: &practice_env
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-learning}:${POSTGRES_PASSWORD:-learning_local}@postgres:5432/practice
       VOCABULARY_URL: http://vocabulary:8000
@@ -60,8 +64,10 @@ services:
       retries: 15
 
   practice-publisher:
-    build: ./services/practice
-    command: ["python", "publisher.py"]
+    build:
+      context: .
+      dockerfile: services/practice/Dockerfile
+    command: ["python", "-m", "services.practice.src.workers.publisher"]
     environment:
       <<: *practice_env
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-learning}:${RABBITMQ_PASSWORD:-learning_local}@rabbitmq:5672/%2F
@@ -72,9 +78,11 @@ services:
     restart: unless-stopped
 
   insights:
-    build: ./services/insights
+    build:
+      context: .
+      dockerfile: services/insights/Dockerfile
     ports:
-      - "127.0.0.1:8003:8000"
+      - "127.0.0.1:${INSIGHTS_PORT:-8003}:8000"
     environment: &insights_env
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-learning}:${POSTGRES_PASSWORD:-learning_local}@postgres:5432/insights
       APP_TIMEZONE: Europe/Moscow
@@ -87,8 +95,10 @@ services:
       retries: 15
 
   insights-worker:
-    build: ./services/insights
-    command: ["python", "worker.py"]
+    build:
+      context: .
+      dockerfile: services/insights/Dockerfile
+    command: ["python", "-m", "services.insights.src.workers.consumer"]
     environment:
       <<: *insights_env
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-learning}:${RABBITMQ_PASSWORD:-learning_local}@rabbitmq:5672/%2F
@@ -101,11 +111,16 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:${FRONTEND_PORT:-8080}:80"
     depends_on:
       vocabulary: {condition: service_healthy}
       practice: {condition: service_healthy}
       insights: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
 
 volumes:
   postgres_data:
