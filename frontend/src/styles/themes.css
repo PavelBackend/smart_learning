@@ -33,17 +33,17 @@
 }
 
 html[data-theme="purple"] {
-  --canvas: #edeaf6;
-  --surface: #fcfbff;
-  --surface-soft: #e9e4f7;
-  --ink: #292747;
-  --muted: #777493;
-  --line: #dcd5eb;
-  --accent: #6754bb;
-  --accent-ink: #5c49b2;
-  --accent-soft: #e2dbf7;
-  --hero: linear-gradient(112deg, #47447e, #675bb1 62%, #7160bd);
-  color-scheme: light;
+  --canvas: #0d0825;
+  --surface: #1b123b;
+  --surface-soft: #2d1c55;
+  --ink: #f6f0ff;
+  --muted: #b7a9d4;
+  --line: #493472;
+  --accent: #8050e8;
+  --accent-ink: #cfb4ff;
+  --accent-soft: #3c246c;
+  --hero: radial-gradient(circle at 83% 18%, #a35cff55, transparent 32%), linear-gradient(112deg, #201044, #43227c 62%, #2b3579);
+  color-scheme: dark;
 }
 html[data-theme="dark"] {
   --canvas: #111827;
@@ -195,3 +195,137 @@ html[data-theme="dark"] :is(
     display: none;
   }
 }
+
+html[data-theme="purple"] .main-content {
+  background:
+    radial-gradient(circle at 85% 0%, #6e3aaa4d, transparent 32%),
+    radial-gradient(circle at 8% 70%, #3546a638, transparent 38%),
+    var(--canvas);
+}
+html[data-theme="purple"] .sidebar {
+  background: linear-gradient(180deg, #190f39, #100a2a 72%);
+}
+html[data-theme="purple"] .topbar {
+  background: #160e34;
+}
+html[data-theme="purple"] :is(
+  .metric-card, .activity-panel, .recent-panel, .quick-link,
+  .dictionary-card, .session-card, .answer-panel, .import-main,
+  .privacy-panel, .journal-form-card, .journal-history
+) {
+  background: linear-gradient(145deg, #201542, #181136);
+  box-shadow: 0 14px 36px #0805194d, inset 0 1px #ffffff0b;
+}
+html[data-theme="purple"] :is(
+  .nav-item.active, .nav-item:hover, .sidebar-tip,
+  .mode-switch, .dictionary-summary, .prompt-card,
+  .dropzone, .tip-panel, .practice-note, .report-review > div
+) {
+  background: linear-gradient(130deg, #392062, #251848);
+  border-color: #604382;
+}
+html[data-theme="purple"] .nav-item.active {
+  color: #e4caff;
+  box-shadow: inset 0 0 18px #a36eff18;
+}
+html[data-theme="purple"] .hero-card,
+html[data-theme="purple"] .question-card {
+  background:
+    radial-gradient(circle at 77% 20%, #ad64ff55, transparent 33%),
+    radial-gradient(circle at 2% 95%, #5360c94d, transparent 40%),
+    linear-gradient(112deg, #261052, #452186 62%, #262c6b);
+  box-shadow: 0 20px 50px #09051e88, inset 0 1px #ffffff18;
+  border: 1px solid #9470c74f;
+}
+html[data-theme="purple"] .art-card {
+  background: linear-gradient(145deg, #362461, #1c1643);
+  border: 1px solid #a67dd66b;
+  box-shadow: 0 24px 40px #09051f88;
+}
+html[data-theme="purple"] .art-card strong,
+html[data-theme="purple"] .art-card span,
+html[data-theme="purple"] .art-card small {
+  color: #efe3ff;
+}
+html[data-theme="purple"] .art-line { background: #8b6bb17a; }
+html[data-theme="purple"] :is(
+  .mode-switch button.selected, .result-icon, .dictionary-summary-icon,
+  .hero-button, .metric-icon, .quick-icon, .drop-icon,
+  .step-heading > span
+) {
+  background: #493073;
+  color: #e4ceff;
+  box-shadow: 0 4px 12px #0c08283d;
+}
+html[data-theme="purple"] :is(
+  .practice-note, .result-good, .result-wrong,
+  .success-message, .stage-chip.stage-high
+) {
+  background: #2d1d50;
+  border-color: var(--line);
+  color: #e3d5f9;
+}
+html[data-theme="purple"] :is(
+  .word-modal label, .progress-fields label, .import-main label,
+  .dropzone strong, .answer-panel label, .result-good strong,
+  .result-wrong strong, .success-message, .tip-panel strong,
+  .question-card h2
+) {
+  color: var(--ink);
+}
+html[data-theme="purple"] :is(
+  .recent-word, .dictionary-card-bottom, .step-divider,
+  .progress-fields select, .answer-input-wrap,
+  .journal-actions, .journal-history a
+) {
+  border-color: var(--line);
+}
+html[data-theme="purple"] :is(
+  .tip-example, .file-preview, .word-avatar,
+  .part-chip
+) {
+  background: #302052;
+  color: #e9ddff;
+  border-color: var(--line);
+}
+html[data-theme="purple"] .status-dot {
+  background: #a78aff;
+  box-shadow: 0 0 0 4px #a78aff30, 0 0 12px #a78aff;
+}
+html[data-theme="purple"] .theme-switcher button.selected {
+  background: #56358a;
+  box-shadow: 0 0 12px #ab74ff44;
+  color: #fff;
+}
+html[data-theme="purple"] .primary-button,
+html[data-theme="purple"] .next-button,
+html[data-theme="purple"] .copy-button {
+  background: linear-gradient(110deg, #7b47db, #654fe0);
+  box-shadow: 0 7px 18px #5b36b15c;
+}
+html[data-theme="purple"] .report-field input,
+html[data-theme="purple"] .report-field textarea,
+html[data-theme="purple"] .report-exercise input {
+  background: #170f33;
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) .cohort-panel {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) .cohort-copy p { color: var(--muted); }
+:is(html[data-theme="purple"], html[data-theme="dark"]) .cohort-form input { background: var(--surface-soft); color: var(--ink); }
+:is(html[data-theme="purple"], html[data-theme="dark"]) .stage-chip.level-0,
+:is(html[data-theme="purple"], html[data-theme="dark"]) .level-preview.level-0 { background: #343d55; color: #c4cede; }
+:is(html[data-theme="purple"], html[data-theme="dark"]) .stage-chip.level-1,
+:is(html[data-theme="purple"], html[data-theme="dark"]) .level-preview.level-1 { background: #563632; color: #ffc0a8; }
+:is(html[data-theme="purple"], html[data-theme="dark"]) .stage-chip.level-2,
+:is(html[data-theme="purple"], html[data-theme="dark"]) .level-preview.level-2 { background: #554327; color: #ffda85; }
+:is(html[data-theme="purple"], html[data-theme="dark"]) .stage-chip.level-3,
+:is(html[data-theme="purple"], html[data-theme="dark"]) .level-preview.level-3 { background: #225b50; color: #99f1ce; }
+:is(html[data-theme="purple"], html[data-theme="dark"]) .stage-chip.level-4,
+:is(html[data-theme="purple"], html[data-theme="dark"]) .level-preview.level-4 { background: #1f4b67; color: #9edbff; }
+:is(html[data-theme="purple"], html[data-theme="dark"]) .stage-chip.level-5,
+:is(html[data-theme="purple"], html[data-theme="dark"]) .level-preview.level-5 { background: #33397b; color: #bfc6ff; }
+:is(html[data-theme="purple"], html[data-theme="dark"]) .stage-chip.level-6,
+:is(html[data-theme="purple"], html[data-theme="dark"]) .level-preview.level-6 { background: #573071; color: #edbaff; }

@@ -1,20 +1,26 @@
 import {
   ArrowLeft,
   ArrowRight,
-  Check,
   CheckCircle2,
+  Pencil,
   RotateCcw,
   Sparkles,
-  X,
+  Trash2,
 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError } from "../api/client";
-import type { AnswerResult, Direction, Question } from "../types";
+import { WordForm } from "../components/dictionary/WordForm";
+import { AnswerFeedback } from "../components/practice/AnswerFeedback";
+import { CohortPanel } from "../components/practice/CohortPanel";
+import { PronunciationButton } from "../components/practice/PronunciationButton";
+import type { AnswerResult, Cohort, Direction, Question, Word } from "../types";
 
 export function Practice() {
   const [direction, setDirection] = useState<Direction>("en_ru");
   const [question, setQuestion] = useState<Question | null>(null);
+  const [cohort, setCohort] = useState<Cohort | null>(null);
+  const [editing, setEditing] = useState<Word | null>(null);
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<AnswerResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -22,6 +28,8 @@ export function Practice() {
   const [done, setDone] = useState(0);
   const [correct, setCorrect] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  const refreshCohort = async () => setCohort(await api.cohort());
 
   const loadQuestion = async (selected: Direction) => {
     setBusy(true);
@@ -32,7 +40,7 @@ export function Practice() {
       setQuestion(await api.next(selected));
     } catch (e) {
       setQuestion(null);
-      if (!(e instanceof ApiError && e.status === 404)) {
+      if (!(e instanceof ApiError && (e.status === 404 || e.status === 409))) {
         setError((e as Error).message);
       }
     } finally {
@@ -41,8 +49,32 @@ export function Practice() {
     }
   };
   useEffect(() => {
+    void refreshCohort().catch((e) => setError((e as Error).message));
     void loadQuestion(direction);
   }, [direction]);
+  useEffect(() => {
+    if (result && !editing) window.setTimeout(() => nextRef.current?.focus(), 0);
+  }, [result, editing]);
+
+  const startCohort = async (count: number) => {
+    setBusy(true);
+    setError("");
+    try {
+      setCohort(await api.startCohort(count));
+      await loadQuestion(direction);
+    } catch (e) { setError(e instanceof ApiError && e.status === 422 && count === 0 ? "Укажи количество слов больше нуля" : (e as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  const expandCohort = async (count: number) => {
+    setBusy(true);
+    setError("");
+    try {
+      setCohort(await api.expandCohort(count));
+      await loadQuestion(direction);
+    } catch (e) { setError(e instanceof ApiError && e.status === 422 && count === 0 ? "Укажи количество слов больше нуля" : (e as Error).message); }
+    finally { setBusy(false); }
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -58,11 +90,59 @@ export function Practice() {
       setResult(response);
       setDone((value) => value + 1);
       if (response.correct) setCorrect((value) => value + 1);
+      await refreshCohort();
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
+  };
+
+  const accept = async () => {
+    if (!result || busy) return;
+    setBusy(true);
+    try {
+      const updated = await api.acceptAttempt(result.attempt_id);
+      if (!result.correct && updated.correct) setCorrect((value) => value + 1);
+      setResult(updated);
+      await refreshCohort();
+    } catch (e) { setError((e as Error).message); }
+    finally { setBusy(false); }
+  };
+  const openEdit = async () => {
+    if (!question) return;
+    setBusy(true);
+    try { setEditing(await api.word(question.word_id)); }
+    catch (e) { setError((e as Error).message); }
+    finally { setBusy(false); }
+  };
+  const afterEdit = async () => {
+    setEditing(null);
+    if (!result) { await loadQuestion(direction); return; }
+    try {
+      const updated = await api.recheckAttempt(result.attempt_id);
+      if (result.correct !== updated.correct) setCorrect((value) => value + (updated.correct ? 1 : -1));
+      setResult(updated);
+      if (question) {
+        const word = await api.word(question.word_id);
+        setQuestion({ ...question, english: word.english, prompt: direction === "en_ru" ? word.english : word.translations[0] });
+      }
+      await refreshCohort();
+    } catch (e) { setError((e as Error).message); }
+  };
+  const remove = async () => {
+    if (!question || busy || !window.confirm(`Удалить «${question.english}» из словаря и из результатов?`)) return;
+    setBusy(true);
+    try {
+      await api.deletePracticeWord(question.word_id);
+      if (result) {
+        setDone((value) => Math.max(0, value - 1));
+        if (result.correct) setCorrect((value) => Math.max(0, value - 1));
+      }
+      await refreshCohort();
+      await loadQuestion(direction);
+    } catch (e) { setError((e as Error).message); }
+    finally { setBusy(false); }
   };
 
   return (
@@ -81,6 +161,7 @@ export function Practice() {
           <ArrowLeft size={17} /> На главную
         </Link>
       </div>
+      <CohortPanel cohort={cohort} busy={busy} onStart={startCohort} onExpand={expandCohort} />
       <div className="practice-layout">
         <section className="practice-main">
           <div className="mode-row">
@@ -115,7 +196,9 @@ export function Practice() {
                 <div className="question-label">
                   Переведи на {direction === "en_ru" ? "русский" : "английский"}
                 </div>
-                <h2>{question.prompt}</h2>
+                <div className="question-word-row"><h2>{question.prompt}</h2>
+                  {(direction === "en_ru" || result) && <PronunciationButton wordId={question.word_id} english={question.english} />}
+                </div>
                 {question.part_of_speech && (
                   <span className="part-chip">{question.part_of_speech}</span>
                 )}
@@ -128,11 +211,8 @@ export function Practice() {
           ) : (
             <div className="question-card empty-question">
               <Sparkles size={34} />
-              <h2>{busy ? "Ищем слово..." : "Пока нет слов для практики"}</h2>
-              <p>Добавь слова в словарь, чтобы начать.</p>
-              <Link to="/import" className="primary-button">
-                Добавить слова <ArrowRight size={18} />
-              </Link>
+              <h2>{busy ? "Ищем слово..." : cohort?.count ? "Пока нечего повторять" : "Выбери первую подборку"}</h2>
+              <p>{cohort?.count ? (direction === "en_ru" && cohort.due_ru_en > 0 || direction === "ru_en" && cohort.due_en_ru > 0 ? "Есть карточки в другом направлении — переключи режим выше." : cohort.can_add ? "Повторы отложены. Можно добавить новые слова в подборку." : "Карточки вернутся, когда наступит время повтора.") : "Укажи количество слов выше, чтобы начать."}</p>
             </div>
           )}
           {question && (
@@ -142,6 +222,7 @@ export function Practice() {
                 <input
                   ref={inputRef}
                   id="answer"
+                  autoFocus
                   placeholder={
                     direction === "en_ru"
                       ? "Напиши перевод на русском..."
@@ -163,40 +244,19 @@ export function Practice() {
               <span className="input-hint">
                 Нажми Enter, чтобы проверить ответ
               </span>
+              {result && <AnswerFeedback result={result} />}
               {result && (
-                <div
-                  className={`result-card ${result.correct ? "result-good" : "result-wrong"}`}
-                >
-                  <div className="result-icon">
-                    {result.correct ? <Check size={20} /> : <X size={20} />}
-                  </div>
-                  <div>
-                    <strong>
-                      {result.correct
-                        ? "Верно! Отличная работа."
-                        : "Почти! Запомним вместе."}
-                    </strong>
-                    <p>
-                      Правильный ответ: <b>{result.accepted.join(" · ")}</b>
-                    </p>
-                    {result.example && (
-                      <div className="example-quote">
-                        <em>“{result.example.en}”</em>
-                        <span>{result.example.ru}</span>
-                      </div>
-                    )}
-                  </div>
+                <div className="answer-actions">
+                  {!result.correct && <button type="button" className="secondary-button" onClick={() => void accept()} disabled={busy}>Мой ответ верный</button>}
+                  <button ref={nextRef} type="button" className="next-button" onClick={() => void loadQuestion(direction)}>
+                    Следующее слово <ArrowRight size={18} />
+                  </button>
                 </div>
               )}
-              {result && (
-                <button
-                  type="button"
-                  className="next-button"
-                  onClick={() => void loadQuestion(direction)}
-                >
-                  Следующее слово <ArrowRight size={18} />
-                </button>
-              )}
+              <div className="practice-word-actions">
+                <button type="button" onClick={() => void openEdit()} disabled={busy}><Pencil size={15} /> Исправить слово</button>
+                <button type="button" onClick={() => void remove()} disabled={busy}><Trash2 size={15} /> Удалить слово</button>
+              </div>
             </form>
           )}
           {error && <div className="alert">{error}</div>}
@@ -241,14 +301,15 @@ export function Practice() {
               Ошибка возвращает слово в ближайшие задания.
             </p>
           </div>
-          <button
+          {question && <button
             className="reset-link"
             onClick={() => void loadQuestion(direction)}
           >
             <RotateCcw size={16} /> Другое слово
-          </button>
+          </button>}
         </aside>
       </div>
+      {editing && <WordForm word={editing} onClose={() => setEditing(null)} onSaved={() => void afterEdit()} />}
     </>
   );
 }

@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from sqlalchemy import Date, DateTime, String
+from sqlalchemy import Boolean, Date, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -17,5 +17,7 @@ class Activity(Base):
     word_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), index=True)
     direction: Mapped[str] = mapped_column(String(5))
     correct: Mapped[bool]
+    revision: Mapped[int] = mapped_column(Integer, default=0)
+    voided: Mapped[bool] = mapped_column(Boolean, default=False)
     day: Mapped[date] = mapped_column(Date, index=True)
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

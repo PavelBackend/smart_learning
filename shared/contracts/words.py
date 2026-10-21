@@ -53,6 +53,14 @@ class WordList(StrictModel):
     total: int = Field(ge=0)
 
 
+class WordIds(StrictModel):
+    ids: list[UUID]
+
+
+class WordBatchInput(StrictModel):
+    ids: list[UUID] = Field(max_length=10_000)
+
+
 class WordExport(StrictModel):
     words: list[WordInput]
 

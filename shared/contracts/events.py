@@ -1,7 +1,7 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import AwareDatetime
+from pydantic import AwareDatetime, Field
 
 from shared.schemas import StrictModel
 
@@ -14,3 +14,5 @@ class AnswerRecordedEvent(StrictModel):
     direction: Direction
     correct: bool
     occurred_at: AwareDatetime
+    revision: int = Field(default=0, ge=0)
+    voided: bool = False

@@ -85,7 +85,6 @@ services:
       - "127.0.0.1:${INSIGHTS_PORT:-8003}:8000"
     environment: &insights_env
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-learning}:${POSTGRES_PASSWORD:-learning_local}@postgres:5432/insights
-      APP_TIMEZONE: Europe/Moscow
     depends_on:
       postgres: {condition: service_healthy}
     healthcheck:
@@ -108,6 +107,34 @@ services:
       insights: {condition: service_healthy}
     restart: unless-stopped
 
+  journal:
+    build:
+      context: .
+      dockerfile: services/journal/Dockerfile
+    ports:
+      - "127.0.0.1:${JOURNAL_PORT:-8004}:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-learning}:${POSTGRES_PASSWORD:-learning_local}@postgres:5432/journal
+    depends_on:
+      postgres: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  pronunciation:
+    build:
+      context: .
+      dockerfile: services/pronunciation/Dockerfile
+    volumes:
+      - ./data/pronunciation:/data:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
   frontend:
     build: ./frontend
     ports:
@@ -116,6 +143,8 @@ services:
       vocabulary: {condition: service_healthy}
       practice: {condition: service_healthy}
       insights: {condition: service_healthy}
+      journal: {condition: service_healthy}
+      pronunciation: {condition: service_healthy}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
       interval: 5s

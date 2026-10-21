@@ -11,12 +11,14 @@ import { Dashboard } from "./pages/Dashboard";
 import { Dictionary } from "./pages/Dictionary";
 import { Practice } from "./pages/Practice";
 import { ImportWords } from "./pages/ImportWords";
+import { DailyReport } from "./pages/DailyReport";
 import "./styles/layout.css";
 import "./styles/dashboard.css";
 import "./styles/practice.css";
 import "./styles/dictionary.css";
 import "./styles/import.css";
 import "./styles/responsive.css";
+import "./styles/journal.css";
 import "./styles/themes.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -28,6 +30,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/dictionary" element={<Dictionary />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/import" element={<ImportWords />} />
+          <Route path="/journal" element={<DailyReport />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>

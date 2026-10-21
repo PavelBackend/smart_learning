@@ -5,6 +5,7 @@ import {
   Flame,
   GraduationCap,
   Languages,
+  NotebookPen,
   Plus,
   Sparkles,
   Target,
@@ -14,6 +15,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { MetricCard } from "../components/MetricCard";
+import { DayPrompt } from "../components/reports/DayPrompt";
 import type { Insights, PracticeSummary, Word } from "../types";
 
 export function Dashboard() {
@@ -22,7 +24,7 @@ export function Dashboard() {
   const [recent, setRecent] = useState<Word[]>([]);
   const [error, setError] = useState("");
   useEffect(() => {
-    Promise.all([api.summary(), api.insights(), api.words()])
+    Promise.all([api.summary(), api.insights(), api.words("", 4)])
       .then(([s, i, w]) => {
         setSummary(s);
         setInsights(i);
@@ -30,7 +32,6 @@ export function Dashboard() {
       })
       .catch((e) => setError(e.message));
   }, []);
-  const firstName = "Павел";
   return (
     <>
       <div className="page-heading">
@@ -39,7 +40,7 @@ export function Dashboard() {
             <span className="eyebrow-line" /> ТВОЙ ПУТЬ К ЯЗЫКУ
           </div>
           <h1>
-            Привет, {firstName} <span className="wave">✳</span>
+            Привет! <span className="wave">✳</span>
           </h1>
           <p>Каждое слово — маленький шаг к свободному английскому.</p>
         </div>
@@ -98,6 +99,7 @@ export function Dashboard() {
           </div>
         </div>
       </section>
+      <DayPrompt />
       <div className="section-line">
         <h3>
           Твой прогресс <span>↗</span>
@@ -161,8 +163,8 @@ export function Dashboard() {
                   title={`${day.date}: ${day.count} ответов`}
                 />
                 <span>
-                  {i % 2 === 0
-                    ? new Date(day.date).toLocaleDateString("ru-RU", {
+                  {i % 2 === 0 && /^\d{4}-\d{2}-\d{2}$/.test(day.date)
+                    ? new Date(`${day.date}T12:00:00`).toLocaleDateString("ru-RU", {
                         day: "numeric",
                       })
                     : ""}
@@ -219,6 +221,16 @@ export function Dashboard() {
         </div>
       </section>
       <div className="quick-links">
+        <Link to="/journal" className="quick-link">
+          <span className="quick-icon lilac">
+            <NotebookPen size={21} />
+          </span>
+          <div>
+            <strong>Мой день</strong>
+            <span>Мысли, английский и движение</span>
+          </div>
+          <ArrowRight size={18} />
+        </Link>
         <Link to="/dictionary" className="quick-link">
           <span className="quick-icon">
             <Plus size={21} />

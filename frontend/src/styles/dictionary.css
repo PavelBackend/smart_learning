@@ -116,6 +116,14 @@
   color: #499e71;
   background: #eaf8ed;
 }
+.stage-chip.level-0, .level-preview.level-0 { color: #69748d; background: #e9edf5; }
+.stage-chip.level-1, .level-preview.level-1 { color: #ae5b48; background: #fff0e9; }
+.stage-chip.level-2, .level-preview.level-2 { color: #96691b; background: #fff4d8; }
+.stage-chip.level-3, .level-preview.level-3 { color: #2a8d79; background: #dff8ef; }
+.stage-chip.level-4, .level-preview.level-4 { color: #227eac; background: #e1f3ff; }
+.stage-chip.level-5, .level-preview.level-5 { color: #555cc8; background: #ececff; }
+.stage-chip.level-6, .level-preview.level-6 { color: #873bc1; background: #f4e7ff; }
+.level-preview { display: inline-block; padding: 7px 10px; border-radius: 20px; margin-top: 7px; font-size: 11px; font-weight: 800; }
 .dictionary-word {
   display: flex;
   align-items: baseline;
@@ -281,4 +289,21 @@
   justify-content: end;
   gap: 9px;
   margin-top: 4px;
+}
+
+.dictionary-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 28px 0 8px;
+  color: var(--text-muted, #77758c);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dictionary-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }

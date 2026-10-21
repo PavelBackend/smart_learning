@@ -1,0 +1,218 @@
+.journal-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 285px;
+  gap: 20px;
+  max-width: 1180px;
+}
+.journal-main { min-width: 0; }
+.journal-hero {
+  min-height: 180px;
+  padding: 30px 34px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(circle at 77% 5%, #b683ff77, transparent 34%),
+    radial-gradient(circle at 100% 92%, #5574e577, transparent 42%),
+    linear-gradient(120deg, #292054, #60419f);
+  box-shadow: 0 20px 40px #39236524;
+}
+.journal-hero::after {
+  content: "";
+  position: absolute;
+  width: 270px;
+  height: 270px;
+  border: 1px solid #ffffff3b;
+  border-radius: 50%;
+  right: 12%;
+  top: -110px;
+  box-shadow: 0 0 0 45px #ffffff0c, 0 0 0 105px #ffffff08;
+}
+.journal-hero > div:first-child { position: relative; z-index: 1; }
+.journal-hero span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #ddd0ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+.journal-hero h2 { margin: 17px 0 4px; font-size: clamp(25px, 3vw, 36px); letter-spacing: -1.4px; }
+.journal-hero p { color: #e3dafa; font-size: 12px; margin: 0; }
+.journal-hero-orb { position: absolute; right: 60px; bottom: 4px; font-size: 100px; color: #ffffff35; z-index: 1; }
+.journal-progress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin: 19px 0;
+}
+.journal-progress button {
+  border: 1px solid var(--line, #e9e5f0);
+  background: var(--surface, #fff);
+  color: var(--muted, #8d8ba0);
+  border-radius: 12px;
+  padding: 10px 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.journal-progress button:hover { transform: translateY(-2px); }
+.journal-progress button span {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 7px;
+  background: var(--surface-soft, #f1edff);
+  color: var(--accent-ink, #7257df);
+  font-size: 9px;
+}
+.journal-progress button.active {
+  background: var(--accent, #6c50e0);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 23px #6143bb33;
+}
+.journal-progress button.active span { background: #ffffff30; color: #fff; }
+.journal-progress button.done { color: var(--accent-ink, #7257df); }
+.journal-form-card,
+.journal-aside-card,
+.journal-history {
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #ecece9);
+  border-radius: 18px;
+  color: var(--ink, #20243b);
+}
+.journal-form-card { padding: 28px 32px 23px; min-height: 490px; }
+.report-step { animation: report-enter 320ms cubic-bezier(.2,.75,.25,1) both; }
+@keyframes report-enter {
+  from { opacity: 0; transform: translateY(13px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.report-step-kicker {
+  color: var(--accent-ink, #7257df);
+  font-size: 10px;
+  letter-spacing: 1.3px;
+  font-weight: 800;
+}
+.report-step h2 { margin: 11px 0 5px; font-size: clamp(22px, 2.4vw, 29px); letter-spacing: -1px; }
+.report-step-intro { font-size: 12px; color: var(--muted, #898b9d); line-height: 1.6; margin: 0 0 25px; }
+.mood-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 22px; }
+.mood-choice {
+  background: var(--surface-soft, #f7f5ff);
+  border: 1px solid var(--line, #e9e3f6);
+  color: var(--ink, #303048);
+  border-radius: 12px;
+  padding: 12px 6px;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.mood-choice span { font-size: 25px; color: var(--accent-ink, #7052db); }
+.mood-choice.selected { border-color: var(--accent, #7052db); box-shadow: 0 0 0 2px #8d65e92b; }
+.report-field { display: flex; flex-direction: column; gap: 8px; margin: 0 0 18px; min-width: 0; }
+.report-field > span, .report-exercises-head strong { font-size: 11px; font-weight: 800; }
+.report-field input, .report-field textarea, .report-exercise input {
+  width: 100%;
+  background: var(--surface, #fff);
+  color: var(--ink, #303048);
+  border: 1px solid var(--line, #e8e5ee);
+  border-radius: 11px;
+  padding: 12px 13px;
+  font-size: 12px;
+  font-weight: 500;
+  outline: none;
+  resize: vertical;
+}
+.report-field textarea { line-height: 1.65; }
+.report-field input:focus, .report-field textarea:focus, .report-exercise input:focus {
+  border-color: var(--accent, #7052db);
+  box-shadow: 0 0 0 3px #815be32a;
+}
+.report-field input::placeholder, .report-field textarea::placeholder, .report-exercise input::placeholder { color: var(--muted, #a3a1ac); }
+.report-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.report-autofill, .report-add-exercise {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line, #e5def3);
+  background: var(--surface-soft, #f6f2ff);
+  color: var(--accent-ink, #684bd5);
+  border-radius: 10px;
+  padding: 10px 13px;
+  font-size: 11px;
+  font-weight: 800;
+  margin: 0 0 21px;
+}
+.report-exercises-head { display: flex; gap: 10px; align-items: baseline; margin: 2px 0 12px; }
+.report-exercises-head span { color: var(--muted, #a4a1b0); font-size: 10px; }
+.report-exercise { display: grid; grid-template-columns: minmax(0, 2fr) 100px 100px 32px; gap: 8px; margin-bottom: 8px; }
+.report-exercise button { border: 0; background: transparent; color: var(--muted, #a3a1ac); display: grid; place-items: center; }
+.report-add-exercise { margin: 5px 0 15px; }
+.report-review { display: grid; gap: 10px; }
+.report-review > div { border: 1px solid var(--line, #ebe7f2); border-radius: 13px; background: var(--surface-soft, #faf9ff); padding: 15px; }
+.report-review span { display: block; color: var(--accent-ink, #7257df); font-size: 9px; font-weight: 800; letter-spacing: 1px; margin-bottom: 7px; }
+.report-review strong { font-size: 13px; }
+.report-review p { font-size: 11px; color: var(--muted, #8f8d9a); line-height: 1.5; margin: 5px 0 0; white-space: pre-wrap; }
+.journal-loading { color: var(--muted, #999); font-size: 12px; padding: 40px 0; }
+.journal-actions { margin-top: 22px; padding-top: 17px; border-top: 1px solid var(--line, #ece9f0); display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.journal-actions > span { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted, #a4a2af); }
+.journal-actions > div { display: flex; gap: 9px; }
+.journal-actions .primary-button { display: inline-flex; align-items: center; gap: 8px; border: 0; }
+.journal-back { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line, #e9e5ef); background: var(--surface, #fff); color: var(--ink, #353249); border-radius: 9px; padding: 11px 14px; font-size: 11px; font-weight: 800; }
+.journal-aside { display: flex; flex-direction: column; gap: 14px; }
+.journal-aside-card { padding: 23px; background: linear-gradient(150deg, var(--surface-soft, #eee9ff), var(--surface, #fff)); }
+.journal-aside-card > svg { color: var(--accent-ink, #6e52dc); margin-bottom: 18px; }
+.journal-aside-card h3 { font-size: 18px; letter-spacing: -.5px; line-height: 1.3; margin: 8px 0; }
+.journal-aside-card p { font-size: 11px; line-height: 1.7; color: var(--muted, #8c8a9c); margin: 0; }
+.journal-history { padding: 18px; display: grid; gap: 5px; }
+.journal-history-head { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 8px; }
+.journal-history button, .journal-history a { display: flex; align-items: center; justify-content: space-between; text-align: left; border: 0; background: transparent; color: var(--muted, #87899a); border-radius: 9px; padding: 10px; font-size: 11px; font-weight: 700; }
+.journal-history button.selected, .journal-history button:hover, .journal-history a:hover { background: var(--surface-soft, #f4f0ff); color: var(--accent-ink, #6e52dc); }
+.journal-history a { border-top: 1px solid var(--line, #ece9f0); border-radius: 0; margin-top: 7px; }
+.day-prompt {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  margin-top: 18px;
+  padding: 18px 50px 18px 20px;
+  border-radius: 16px;
+  color: #f6efff;
+  background: linear-gradient(105deg, #211241, #553176 68%, #65448c);
+  border: 1px solid #9f78d950;
+  box-shadow: 0 14px 28px #2714381c;
+}
+.day-prompt-icon { width: 43px; height: 43px; flex: 0 0 43px; border-radius: 13px; display: grid; place-items: center; background: #ffffff1c; color: #d2baff; }
+.day-prompt > div:nth-child(2) { flex: 1; }
+.day-prompt span { color: #cfb8f6; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; }
+.day-prompt h2 { margin: 4px 0; font-size: 15px; letter-spacing: -.4px; }
+.day-prompt p { margin: 0; font-size: 11px; color: #d0c0e6; }
+.day-prompt-link { display: inline-flex; align-items: center; gap: 8px; background: #e9d9ff; color: #3f2368; padding: 10px 12px; border-radius: 9px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.day-prompt-close { position: absolute; top: 13px; right: 13px; background: transparent; border: 0; color: #c9b3e8; display: grid; place-items: center; padding: 4px; }
+@media (max-width: 1050px) { .journal-layout { grid-template-columns: 1fr; } .journal-aside { display: grid; grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px) {
+  .journal-hero { padding: 25px; }
+  .journal-hero-orb { right: 4px; opacity: .55; }
+  .journal-progress { gap: 4px; }
+  .journal-progress button { font-size: 0; }
+  .journal-progress button span { font-size: 9px; }
+  .journal-form-card { padding: 22px 18px; }
+  .mood-grid { grid-template-columns: repeat(2, 1fr); }
+  .report-field-row, .journal-aside { grid-template-columns: 1fr; }
+  .report-exercise { grid-template-columns: 1fr 1fr 1fr 30px; }
+  .journal-actions { align-items: stretch; flex-direction: column-reverse; }
+  .journal-actions > div { justify-content: flex-end; }
+  .day-prompt { align-items: flex-start; flex-wrap: wrap; }
+  .day-prompt-link { margin-left: 59px; }
+}
+@media (prefers-reduced-motion: reduce) { .report-step { animation: none; } }

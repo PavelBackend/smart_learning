@@ -7,6 +7,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   Menu,
+  NotebookPen,
   X,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -18,6 +19,7 @@ const navigation = [
   { to: "/dictionary", label: "Мой словарь", icon: BookOpen },
   { to: "/practice", label: "Практика", icon: GraduationCap },
   { to: "/import", label: "Импорт слов", icon: CloudUpload },
+  { to: "/journal", label: "Мой день", icon: NotebookPen },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -101,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <ThemeSwitcher />
             <span className="status-dot" />
             <span className="local-status">Локально на вашем ноутбуке</span>
-            <div className="avatar">P</div>
+            <div className="avatar">✦</div>
           </div>
         </header>
         <div className="page-content">{children}</div>

@@ -1,40 +1,33 @@
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import datetime, time, timedelta, timezone
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from shared.contracts.events import AnswerRecordedEvent
+from shared.errors import DomainError
 
-from ..config import get_settings
 from ..db import SessionLocal
-from ..models import Activity
 from ..repositories.activity import ActivityRepository
 from ..schemas import DailyActivity, InsightsSummary
 
 
 class ActivityService:
-    def __init__(self):
-        self.timezone = ZoneInfo(get_settings().app_timezone)
-
     def record(self, event: AnswerRecordedEvent) -> None:
         with SessionLocal.begin() as session:
-            ActivityRepository(session).add(
-                Activity(
-                    event_id=event.event_id,
-                    word_id=event.word_id,
-                    direction=event.direction,
-                    correct=event.correct,
-                    day=event.occurred_at.astimezone(self.timezone).date(),
-                    occurred_at=event.occurred_at,
-                )
-            )
+            ActivityRepository(session).upsert(event)
 
-    def summary(self) -> InsightsSummary:
-        today = datetime.now(self.timezone).date()
+    def summary(self, timezone_name: str) -> InsightsSummary:
+        try:
+            local_timezone = ZoneInfo(timezone_name)
+        except ZoneInfoNotFoundError as exc:
+            raise DomainError(422, "Use a valid IANA timezone") from exc
+        today = datetime.now(local_timezone).date()
+        start = datetime.combine(today, time.min, local_timezone).astimezone(timezone.utc)
+        end = datetime.combine(today + timedelta(days=1), time.min, local_timezone).astimezone(timezone.utc)
         with SessionLocal() as session:
             repository = ActivityRepository(session)
             total = repository.count()
             correct = repository.count(correct=True)
-            counts = repository.daily_counts(today - timedelta(days=13))
-            practiced_days = repository.practiced_days()
+            counts = repository.daily_counts(today - timedelta(days=13), timezone_name)
+            practiced_days = repository.practiced_days(timezone_name)
             cursor = today if today in practiced_days else today - timedelta(days=1)
             streak = 0
             while cursor in practiced_days:
@@ -44,7 +37,8 @@ class ActivityService:
                 total_answers=total,
                 correct_answers=correct,
                 accuracy=round(correct / total * 100) if total else 0,
-                today_answers=repository.count(day=today),
+                today_answers=repository.count_between(start, end),
+                today_words=repository.count_between(start, end, distinct_words=True),
                 streak=streak,
                 activity=[
                     DailyActivity(

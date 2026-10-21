@@ -3,7 +3,15 @@ from uuid import UUID
 
 from fastapi import APIRouter, File, Query, UploadFile
 
-from shared.contracts.words import ImportResult, WordExport, WordInput, WordList, WordRead
+from shared.contracts.words import (
+    ImportResult,
+    WordBatchInput,
+    WordExport,
+    WordIds,
+    WordInput,
+    WordList,
+    WordRead,
+)
 
 from ..config import get_settings
 from ..services.words import WordService
@@ -24,6 +32,16 @@ def list_words(
 @router.get("/words/export", response_model=WordExport)
 def export_words():
     return service.export()
+
+
+@router.get("/words/ids", response_model=WordIds)
+def list_word_ids():
+    return service.ids()
+
+
+@router.post("/words/batch", response_model=WordList)
+def batch_words(payload: WordBatchInput):
+    return service.batch(payload)
 
 
 @router.get("/words/{word_id}", response_model=WordRead)

@@ -60,10 +60,13 @@
     grid-template-columns: 1fr 1fr;
   }
   .hero-art {
-    opacity: 0.65;
+    opacity: 0.32;
+  }
+  .hero-art .art-card {
+    display: none;
   }
   .hero-copy {
-    width: 72%;
+    width: 80%;
   }
   .practice-layout,
   .import-layout {

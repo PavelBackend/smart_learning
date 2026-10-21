@@ -2,16 +2,9 @@ import { ArrowRight, X } from "lucide-react";
 import { useState } from "react";
 import { api } from "../../api/client";
 import type { Direction, Progress, Word } from "../../types";
+import { levelClass, levelIntervals, levelName } from "./levels";
 
-const stageLabels = [
-  "Новое · сегодня",
-  "Уровень 2 · завтра",
-  "Уровень 3 · через 3 дня",
-  "Уровень 4 · через 7 дней",
-  "Уровень 5 · через 14 дней",
-  "Уровень 6 · через 30 дней",
-  "Усвоено · через 60 дней",
-];
+const stageLabels = levelIntervals.map((interval, stage) => `${levelName(stage)} · ${interval}`);
 export function ProgressForm({
   word,
   progress,
@@ -73,7 +66,7 @@ export function ProgressForm({
         <div className="progress-fields">
           <label>
             Английский → русский
-            <select
+            <select className={levelClass(enRu)}
               value={enRu}
               onChange={(event) => setEnRu(Number(event.target.value))}
             >
@@ -83,10 +76,11 @@ export function ProgressForm({
                 </option>
               ))}
             </select>
+            <span className={`level-preview ${levelClass(enRu)}`}>{stageLabels[enRu]}</span>
           </label>
           <label>
             Русский → английский
-            <select
+            <select className={levelClass(ruEn)}
               value={ruEn}
               onChange={(event) => setRuEn(Number(event.target.value))}
             >
@@ -96,6 +90,7 @@ export function ProgressForm({
                 </option>
               ))}
             </select>
+            <span className={`level-preview ${levelClass(ruEn)}`}>{stageLabels[ruEn]}</span>
           </label>
         </div>
         {error && <div className="alert">{error}</div>}

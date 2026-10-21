@@ -16,10 +16,24 @@ class WordRepository:
         query = select(Word)
         if search.strip():
             term = f"%{search.strip()}%"
-            query = query.where(Word.english.ilike(term) | Word.translations.cast(String).ilike(term))
+            query = query.where(
+                Word.english.ilike(term)
+                | Word.translations.cast(String).ilike(term)
+                | Word.tags.cast(String).ilike(term)
+            )
         total = self.session.scalar(select(func.count()).select_from(query.subquery())) or 0
-        words = self.session.scalars(query.order_by(Word.created_at.desc()).offset(offset).limit(limit)).all()
+        words = self.session.scalars(
+            query.order_by(Word.created_at.desc(), Word.id.desc()).offset(offset).limit(limit)
+        ).all()
         return list(words), total
+
+    def ids(self) -> list[UUID]:
+        return list(self.session.scalars(select(Word.id)).all())
+
+    def by_ids(self, ids: list[UUID]) -> list[Word]:
+        if not ids:
+            return []
+        return list(self.session.scalars(select(Word).where(Word.id.in_(ids))).all())
 
     def all(self) -> list[Word]:
         return list(self.session.scalars(select(Word).order_by(Word.english)).all())

@@ -3,7 +3,16 @@ from uuid import UUID
 
 from pydantic import ValidationError
 
-from shared.contracts.words import ImportResult, WordExport, WordImport, WordInput, WordList, WordRead
+from shared.contracts.words import (
+    ImportResult,
+    WordBatchInput,
+    WordExport,
+    WordIds,
+    WordImport,
+    WordInput,
+    WordList,
+    WordRead,
+)
 from shared.errors import DomainError
 
 from ..config import get_settings
@@ -24,6 +33,15 @@ class WordService:
             if word is None:
                 raise DomainError(404, "Word not found")
             return WordRead.model_validate(word)
+
+    def ids(self) -> WordIds:
+        with SessionLocal() as session:
+            return WordIds(ids=WordRepository(session).ids())
+
+    def batch(self, payload: WordBatchInput) -> WordList:
+        with SessionLocal() as session:
+            words = WordRepository(session).by_ids(payload.ids)
+            return WordList(items=[WordRead.model_validate(word) for word in words], total=len(words))
 
     def create(self, payload: WordInput) -> WordRead:
         with SessionLocal.begin() as session:

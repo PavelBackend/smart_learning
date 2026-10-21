@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -35,6 +35,9 @@ class Attempt(Base):
     direction: Mapped[str] = mapped_column(String(5))
     answer: Mapped[str] = mapped_column(String(500))
     correct: Mapped[bool]
+    revision: Mapped[int] = mapped_column(Integer, default=0)
+    voided: Mapped[bool] = mapped_column(Boolean, default=False)
+    stage_before: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -50,3 +53,14 @@ class Outbox(Base):
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class StudyCohort(Base):
+    __tablename__ = "study_cohort"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    word_ids: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    requested_count: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { ProgressForm } from "../components/dictionary/ProgressForm";
 import { WordForm } from "../components/dictionary/WordForm";
+import { levelClass, levelName } from "../components/dictionary/levels";
 import type { Progress, Word } from "../types";
 
 const wordCountLabel = (count: number) =>
@@ -16,34 +17,50 @@ const wordCountLabel = (count: number) =>
       : "слов";
 
 export function Dictionary() {
+  const pageSize = 24;
   const [words, setWords] = useState<Word[]>([]);
   const [progress, setProgress] = useState<Progress[]>([]);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [collectionTotal, setCollectionTotal] = useState(0);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Word | "new" | null>(null);
   const [grading, setGrading] = useState<Word | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const reload = () =>
-    Promise.all([api.words(), api.progress()])
-      .then(([wordsResponse, progressResponse]) => {
-        setWords(wordsResponse.items);
-        setProgress(progressResponse.items);
-      })
-      .catch((e) => setError(e.message));
   useEffect(() => {
-    void reload();
-  }, []);
-  const filtered = words.filter((word) =>
-    `${word.english} ${word.translations.join(" ")} ${word.tags.join(" ")}`
-      .toLocaleLowerCase()
-      .includes(search.toLocaleLowerCase()),
-  );
+    let cancelled = false;
+    setLoading(true);
+    const timer = window.setTimeout(() => {
+      api.words(search.trim(), pageSize, page * pageSize)
+        .then(async (response) => {
+          if (response.total > 0 && page * pageSize >= response.total) {
+            if (!cancelled) setPage(Math.ceil(response.total / pageSize) - 1);
+            return;
+          }
+          const rows = await api.progressForWords(response.items.map((word) => word.id));
+          if (cancelled) return;
+          setWords(response.items);
+          setProgress(rows.items);
+          setTotal(response.total);
+          if (!search.trim()) setCollectionTotal(response.total);
+          setError("");
+        })
+        .catch((e) => { if (!cancelled) setError((e as Error).message); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    }, search ? 250 : 0);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [search, page, reloadKey]);
+  const reload = () => setReloadKey((value) => value + 1);
   const remove = async (word: Word) => {
     if (!window.confirm(`Удалить «${word.english}» из словаря?`)) return;
     setBusy(true);
     try {
-      await api.deleteWord(word.id);
-      await reload();
+      await api.deletePracticeWord(word.id);
+      if (words.length === 1 && page > 0) setPage((value) => value - 1);
+      else reload();
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -93,7 +110,7 @@ export function Dictionary() {
         <div>
           <span>ТВОЯ КОЛЛЕКЦИЯ</span>
           <strong>
-            {words.length} {wordCountLabel(words.length)} на пути к свободной
+            {collectionTotal} {wordCountLabel(collectionTotal)} на пути к свободной
             речи
           </strong>
         </div>
@@ -105,7 +122,7 @@ export function Dictionary() {
           <input
             placeholder="Найти слово или перевод..."
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => { setSearch(event.target.value); setPage(0); }}
           />
         </div>
         <div className="toolbar-actions">
@@ -118,16 +135,14 @@ export function Dictionary() {
         </div>
       </div>
       {error && <div className="alert">{error}</div>}
-      {filtered.length ? (
+      {words.length ? (
         <div className="word-grid">
-          {filtered.map((word, index) => {
+          {words.map((word, index) => {
             const stages = progress.filter((row) => row.word_id === word.id);
-            const stage = stages.length
-              ? Math.round(
-                  stages.reduce((sum, row) => sum + row.stage, 0) /
-                    stages.length,
-                )
-              : 0;
+            const stage = Math.min(
+              stages.find((row) => row.direction === "en_ru")?.stage ?? 0,
+              stages.find((row) => row.direction === "ru_en")?.stage ?? 0,
+            );
             return (
               <article className="dictionary-card" key={word.id}>
                 <div className="dictionary-card-top">
@@ -135,15 +150,11 @@ export function Dictionary() {
                     {word.english.slice(0, 1).toUpperCase()}
                   </span>
                   <button
-                    className={`stage-chip ${stage >= 4 ? "stage-high" : ""}`}
+                    className={`stage-chip ${levelClass(stage)}`}
                     onClick={() => setGrading(word)}
                     title="Изменить уровень изученности"
                   >
-                    {stage >= 4
-                      ? "Усвоено"
-                      : stage
-                        ? `Уровень ${stage + 1}`
-                        : "Новое"}{" "}
+                    {levelName(stage)}{" "}
                     <Pencil size={11} />
                   </button>
                 </div>
@@ -187,7 +198,7 @@ export function Dictionary() {
             );
           })}
         </div>
-      ) : (
+      ) : !loading ? (
         <div className="dictionary-empty">
           <div className="empty-illustration">
             Aa<span>✳</span>
@@ -204,14 +215,19 @@ export function Dictionary() {
             </Link>
           )}
         </div>
-      )}
+      ) : <div className="dictionary-empty">Загружаем слова…</div>}
+      {total > pageSize && <nav className="dictionary-pagination" aria-label="Страницы словаря">
+        <button className="secondary-button" disabled={page === 0 || loading} onClick={() => setPage((value) => value - 1)}>← Назад</button>
+        <span>Страница {page + 1} из {Math.ceil(total / pageSize)} · {total} {wordCountLabel(total)}</span>
+        <button className="secondary-button" disabled={(page + 1) * pageSize >= total || loading} onClick={() => setPage((value) => value + 1)}>Далее →</button>
+      </nav>}
       {editing && (
         <WordForm
           word={editing === "new" ? null : editing}
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null);
-            void reload();
+            reload();
           }}
         />
       )}
@@ -222,7 +238,7 @@ export function Dictionary() {
           onClose={() => setGrading(null)}
           onSaved={() => {
             setGrading(null);
-            void reload();
+            reload();
           }}
         />
       )}

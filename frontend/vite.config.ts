@@ -18,6 +18,10 @@ export default defineConfig({
         target: "http://localhost:8003",
         rewrite: (path) => path.replace("/api", ""),
       },
+      "/api/journal": {
+        target: "http://localhost:8004",
+        rewrite: (path) => path.replace("/api", ""),
+      },
     },
   },
 });

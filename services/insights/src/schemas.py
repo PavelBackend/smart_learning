@@ -15,5 +15,6 @@ class InsightsSummary(StrictModel):
     correct_answers: int = Field(ge=0)
     accuracy: int = Field(ge=0, le=100)
     today_answers: int = Field(ge=0)
+    today_words: int = Field(ge=0)
     streak: int = Field(ge=0)
     activity: list[DailyActivity]
