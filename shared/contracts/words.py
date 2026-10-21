@@ -58,7 +58,7 @@ class WordExport(StrictModel):
 
 
 class WordImport(StrictModel):
-    words: list[WordInput] = Field(min_length=1)
+    words: list[WordInput] = Field(min_length=1, max_length=10_000)
 
 
 class ImportResult(StrictModel):

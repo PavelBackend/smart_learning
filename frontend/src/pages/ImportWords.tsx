@@ -14,6 +14,8 @@ import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 
+const MAX_IMPORT_FILE_BYTES = 20_000_000;
+
 export function ImportWords() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string[]>([]);
@@ -34,8 +36,8 @@ export function ImportWords() {
       setError("Нужен файл с расширением .json");
       return;
     }
-    if (next.size > 2_000_000) {
-      setError("Максимальный размер файла — 2 МБ");
+    if (next.size > MAX_IMPORT_FILE_BYTES) {
+      setError("Максимальный размер файла — 20 МБ");
       return;
     }
     try {
@@ -181,7 +183,7 @@ export function ImportWords() {
                 ? `${(file.size / 1024).toFixed(1)} КБ · готов к импорту`
                 : "или нажми, чтобы выбрать на компьютере"}
             </p>
-            <span className="drop-format">JSON · до 2 МБ</span>
+            <span className="drop-format">JSON · до 20 МБ</span>
           </div>
           {file && (
             <div className="file-preview">

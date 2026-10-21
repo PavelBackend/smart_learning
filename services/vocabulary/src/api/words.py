@@ -5,6 +5,7 @@ from fastapi import APIRouter, File, Query, UploadFile
 
 from shared.contracts.words import ImportResult, WordExport, WordInput, WordList, WordRead
 
+from ..config import get_settings
 from ..services.words import WordService
 
 router = APIRouter(tags=["words"])
@@ -47,4 +48,5 @@ def delete_word(word_id: UUID):
 
 @router.post("/words/import", response_model=ImportResult)
 async def import_words(file: Annotated[UploadFile, File()]):
-    return service.import_file(file.filename, await file.read(2_000_001))
+    max_bytes = get_settings().import_file_max_bytes
+    return service.import_file(file.filename, await file.read(max_bytes + 1))

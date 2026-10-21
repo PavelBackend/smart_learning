@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from shared.contracts.words import ImportResult, WordExport, WordImport, WordInput, WordList, WordRead
 from shared.errors import DomainError
 
+from ..config import get_settings
 from ..db import SessionLocal
 from ..models import Word
 from ..repositories.words import WordRepository
@@ -72,8 +73,10 @@ class WordService:
     def import_file(self, filename: str | None, raw: bytes) -> ImportResult:
         if not filename or not filename.lower().endswith(".json"):
             raise DomainError(400, "Upload a .json file")
-        if len(raw) > 2_000_000:
-            raise DomainError(413, "File is larger than 2 MB")
+        max_bytes = get_settings().import_file_max_bytes
+        if len(raw) > max_bytes:
+            max_megabytes = max_bytes // 1_000_000
+            raise DomainError(413, f"File is larger than {max_megabytes} MB")
         try:
             data = json.loads(raw)
             batch = WordImport.model_validate({"words": data} if isinstance(data, list) else data)
