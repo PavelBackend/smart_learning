@@ -9,14 +9,21 @@ import type {
   WordInput,
 } from "../types";
 
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api${path}`, init);
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    throw new Error(
+    throw new ApiError(
       typeof body?.detail === "string"
         ? body.detail
         : `Ошибка сервера (${response.status})`,
+      response.status,
     );
   }
   if (response.status === 204) return undefined as T;

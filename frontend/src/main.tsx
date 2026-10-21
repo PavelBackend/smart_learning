@@ -17,6 +17,7 @@ import "./styles/practice.css";
 import "./styles/dictionary.css";
 import "./styles/import.css";
 import "./styles/responsive.css";
+import "./styles/themes.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

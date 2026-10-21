@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../api/client";
+import { api, ApiError } from "../api/client";
 import type { AnswerResult, Direction, Question } from "../types";
 
 export function Practice() {
@@ -32,7 +32,9 @@ export function Practice() {
       setQuestion(await api.next(selected));
     } catch (e) {
       setQuestion(null);
-      setError((e as Error).message);
+      if (!(e instanceof ApiError && e.status === 404)) {
+        setError((e as Error).message);
+      }
     } finally {
       setBusy(false);
       setTimeout(() => inputRef.current?.focus(), 0);

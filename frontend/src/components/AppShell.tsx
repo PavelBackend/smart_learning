@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 const navigation = [
   { to: "/", label: "Обзор", icon: LayoutDashboard },
@@ -97,7 +98,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <strong>{title}</strong>
           </div>
           <div className="topbar-right">
-            <span className="status-dot" /> Локально на вашем ноутбуке{" "}
+            <ThemeSwitcher />
+            <span className="status-dot" />
+            <span className="local-status">Локально на вашем ноутбуке</span>
             <div className="avatar">P</div>
           </div>
         </header>

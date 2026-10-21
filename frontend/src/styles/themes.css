@@ -1,0 +1,197 @@
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  margin-right: 13px;
+  border: 1px solid #e7e5ee;
+  border-radius: 12px;
+  background: #f6f4fb;
+}
+.theme-switcher button {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 27px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #89869c;
+}
+.theme-switcher button:hover {
+  color: #694ce1;
+}
+.theme-switcher button.selected {
+  background: #fff;
+  color: #694ce1;
+  box-shadow: 0 1px 5px #28204912;
+}
+.theme-switcher button:focus-visible {
+  outline: 2px solid #8e79ec;
+  outline-offset: 2px;
+}
+
+html[data-theme="purple"] {
+  --canvas: #edeaf6;
+  --surface: #fcfbff;
+  --surface-soft: #e9e4f7;
+  --ink: #292747;
+  --muted: #777493;
+  --line: #dcd5eb;
+  --accent: #6754bb;
+  --accent-ink: #5c49b2;
+  --accent-soft: #e2dbf7;
+  --hero: linear-gradient(112deg, #47447e, #675bb1 62%, #7160bd);
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  --canvas: #111827;
+  --surface: #1b2437;
+  --surface-soft: #27334b;
+  --ink: #eef0fa;
+  --muted: #a9b4ce;
+  --line: #354159;
+  --accent: #9685ec;
+  --accent-ink: #c6baff;
+  --accent-soft: #343654;
+  --hero: linear-gradient(112deg, #32305f, #42397a 62%, #504084);
+  color-scheme: dark;
+}
+
+:is(html[data-theme="purple"], html[data-theme="dark"]) {
+  background: var(--canvas);
+  color: var(--ink);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) body,
+:is(html[data-theme="purple"], html[data-theme="dark"]) .main-content {
+  background: var(--canvas);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) :is(
+  .sidebar, .topbar, .date-pill, .secondary-button, .back-link,
+  .metric-card, .activity-panel, .recent-panel, .quick-link, .answer-panel, .session-card,
+  .search-box, .dictionary-card, .dictionary-empty, .word-modal,
+  .import-main, .tip-example, .privacy-panel, .progress-fields select
+) {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) :is(
+  .sidebar, .topbar, .metric-card, .activity-panel, .recent-panel, .quick-link,
+  .answer-panel, .session-card, .dictionary-card, .word-modal,
+  .import-main, .privacy-panel
+) {
+  box-shadow: 0 8px 26px #080d2110;
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) :is(
+  .nav-item.active, .nav-item:hover, .sidebar-tip, .avatar,
+  .mode-switch, .dictionary-summary, .stage-chip, .tag, .empty-illustration,
+  .prompt-card, .step-heading > span, .dropzone, .tip-panel, .session-icon,
+  .session-line, .activity-bar, .light-pill, .art-line
+) {
+  background: var(--surface-soft);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) :is(
+  .nav-item.active, .nav-item:hover, .brand strong span,
+  .sidebar-tip a, .eyebrow, .icon-link, .metric-value, .stage-chip,
+  .step-heading > span, .prompt-card-icon, .light-pill
+) {
+  color: var(--accent-ink);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) :is(
+  .primary-button, .copy-button, .answer-input-wrap button,
+  .next-button, .mobile-menu
+) {
+  background: var(--accent);
+  color: #fff;
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) .hero-card {
+  background: var(--hero);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) :is(
+  .page-heading h1, .breadcrumb strong, .sidebar-tip strong, .panel-head h3, .empty-mini strong,
+  .metric-card strong, .metric-card b, .recent-word strong,
+  .quick-link strong, .dictionary-word h3, .dictionary-summary strong,
+  .dictionary-empty h2, .word-modal h2, .step-heading h2,
+  .import-main h2, .session-card strong, .question-card h2,
+  .privacy-panel strong, .tip-panel strong
+) {
+  color: var(--ink);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) :is(
+  .page-heading p, .breadcrumb, .topbar-right, .sidebar-help,
+  .sidebar-tip p, .brand small, .nav-item, .date-pill,
+  .metric-card p, .metric-card span, .recent-word span, .activity-panel > p,
+  .quick-link div span, .dictionary-translation, .dictionary-example,
+  .dictionary-empty p, .word-modal p, .step-heading p,
+  .import-main p, .privacy-panel p, .practice-note p,
+  .session-card p, .panel-kicker, .sidebar-section-title,
+  .secondary-button, .back-link
+) {
+  color: var(--muted);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) :is(
+  .search-box input, .answer-input-wrap input, .word-modal input,
+  .word-modal textarea, .progress-fields select
+) {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) :is(
+  .search-box input::placeholder, .answer-input-wrap input::placeholder,
+  .word-modal input::placeholder, .word-modal textarea::placeholder
+) {
+  color: var(--muted);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) .theme-switcher {
+  background: var(--surface-soft);
+  border-color: var(--line);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) .theme-switcher button {
+  color: var(--muted);
+}
+:is(html[data-theme="purple"], html[data-theme="dark"]) .theme-switcher button.selected {
+  background: var(--surface);
+  color: var(--accent-ink);
+}
+
+html[data-theme="dark"] :is(
+  .mode-switch button.selected, .result-icon, .dictionary-summary-icon,
+  .hero-button, .art-card, .metric-icon, .quick-icon, .drop-icon
+) {
+  background: var(--surface);
+  color: var(--accent-ink);
+}
+html[data-theme="dark"] :is(
+  .prompt-card, .dropzone, .dropzone.dragging, .dropzone.has-file,
+  .practice-note, .result-good, .result-wrong, .success-message,
+  .stage-chip.stage-high, .quick-icon.lilac, .metric-icon
+) {
+  background: var(--surface-soft);
+  border-color: var(--line);
+}
+html[data-theme="dark"] :is(
+  .word-modal label, .progress-fields label, .import-main label,
+  .dropzone strong, .answer-panel label, .result-good strong,
+  .result-wrong strong, .success-message
+) {
+  color: var(--ink);
+}
+html[data-theme="dark"] :is(
+  .recent-word, .dictionary-card-bottom, .step-divider,
+  .progress-fields select, .answer-input-wrap
+) {
+  border-color: var(--line);
+}
+
+@media (max-width: 620px) {
+  .theme-switcher {
+    margin-right: 2px;
+  }
+  .local-status,
+  .status-dot {
+    display: none;
+  }
+}
