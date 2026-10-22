@@ -10,6 +10,12 @@ from ..schemas import ReportInput, ReportList, ReportRead
 
 
 class ReportService:
+    def month(self, year: int, month: int) -> ReportList:
+        with SessionLocal() as session:
+            return ReportList(
+                items=[ReportRead.model_validate(row) for row in ReportRepository(session).month(year, month)]
+            )
+
     def list(self, limit: int) -> ReportList:
         with SessionLocal() as session:
             return ReportList(

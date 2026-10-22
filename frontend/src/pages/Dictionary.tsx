@@ -2,6 +2,7 @@ import { ArrowDownToLine, ArrowRight, BookOpen, Pencil, Plus, Search, Trash2 } f
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
+import { ConfirmDeleteDialog } from "../components/ConfirmDeleteDialog";
 import { ProgressForm } from "../components/dictionary/ProgressForm";
 import { WordForm } from "../components/dictionary/WordForm";
 import { levelClass, levelName } from "../components/dictionary/levels";
@@ -28,6 +29,7 @@ export function Dictionary() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Word | "new" | null>(null);
   const [grading, setGrading] = useState<Word | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Word | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -54,11 +56,12 @@ export function Dictionary() {
     return () => { cancelled = true; window.clearTimeout(timer); };
   }, [search, page, reloadKey]);
   const reload = () => setReloadKey((value) => value + 1);
-  const remove = async (word: Word) => {
-    if (!window.confirm(`Удалить «${word.english}» из словаря?`)) return;
+  const remove = async () => {
+    if (!pendingDelete) return;
     setBusy(true);
     try {
-      await api.deletePracticeWord(word.id);
+      await api.deletePracticeWord(pendingDelete.id);
+      setPendingDelete(null);
       if (words.length === 1 && page > 0) setPage((value) => value - 1);
       else reload();
     } catch (e) {
@@ -168,6 +171,9 @@ export function Dictionary() {
                 {word.examples[0] && (
                   <div className="dictionary-example">
                     “{word.examples[0].en}”
+                    {word.examples[0].source_url && <a href={word.examples[0].source_url} target="_blank" rel="noreferrer">
+                      {word.examples[0].attribution || "Tatoeba"} · {word.examples[0].license} ↗
+                    </a>}
                   </div>
                 )}
                 <div className="dictionary-card-bottom">
@@ -186,7 +192,7 @@ export function Dictionary() {
                       <Pencil size={17} />
                     </button>
                     <button
-                      onClick={() => void remove(word)}
+                      onClick={() => { setError(""); setPendingDelete(word); }}
                       disabled={busy}
                       aria-label={`Удалить ${word.english}`}
                     >
@@ -242,6 +248,8 @@ export function Dictionary() {
           }}
         />
       )}
+      {pendingDelete && <ConfirmDeleteDialog word={pendingDelete.english} busy={busy} error={error}
+        onCancel={() => setPendingDelete(null)} onConfirm={() => void remove()} />}
     </>
   );
 }

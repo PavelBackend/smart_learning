@@ -10,7 +10,9 @@ export function AnswerFeedback({ result }: { result: AnswerResult }) {
     <div>
       <strong>{result.correct ? "Верно! Отличная работа." : "Почти! Запомним вместе."}</strong>
       <p>Правильный ответ: <b>{result.accepted.join(" · ")}</b></p>
-      {result.example && <div className="example-quote"><em>“{result.example.en}”</em><span>{result.example.ru}</span></div>}
+      {result.example && <div className="example-quote"><em>“{result.example.en}”</em><span>{result.example.ru}</span>
+        {result.example.source_url && <a href={result.example.source_url} target="_blank" rel="noreferrer">{result.example.attribution || "Источник"} · {result.example.license}</a>}
+      </div>}
     </div>
   </div>;
 }

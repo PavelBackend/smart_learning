@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, File, Query, UploadFile
 
 from shared.contracts.words import (
+    ExampleEnrichment,
     ImportResult,
     WordBatchInput,
     WordExport,
@@ -47,6 +48,11 @@ def batch_words(payload: WordBatchInput):
 @router.get("/words/{word_id}", response_model=WordRead)
 def get_word(word_id: UUID):
     return service.get(word_id)
+
+
+@router.patch("/words/{word_id}/examples", response_model=WordRead)
+def enrich_examples(word_id: UUID, payload: ExampleEnrichment):
+    return service.enrich_examples(word_id, payload)
 
 
 @router.post("/words", response_model=WordRead, status_code=201)

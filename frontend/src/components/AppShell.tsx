@@ -19,14 +19,14 @@ const navigation = [
   { to: "/dictionary", label: "Мой словарь", icon: BookOpen },
   { to: "/practice", label: "Практика", icon: GraduationCap },
   { to: "/import", label: "Импорт слов", icon: CloudUpload },
-  { to: "/journal", label: "Мой день", icon: NotebookPen },
+  { to: "/journal", label: "Мой дневник", icon: NotebookPen },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const title =
-    navigation.find((item) => item.to === location.pathname)?.label ??
+    navigation.find((item) => item.to === location.pathname || (item.to !== "/" && location.pathname.startsWith(`${item.to}/`)))?.label ??
     "Wordwell";
 
   return (

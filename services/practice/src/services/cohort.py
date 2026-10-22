@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from random import sample
+from random import sample, shuffle
 from uuid import UUID
 
 from shared.contracts.events import Direction
@@ -9,8 +9,7 @@ from ..clients.vocabulary import VocabularyClient
 from ..db import SessionLocal
 from ..models import Progress, StudyCohort
 from ..repositories.practice import PracticeRepository
-from ..schemas import CohortInput, CohortRead, Question
-from .selection import choose_word
+from ..schemas import CohortInput, CohortRead, Question, QuestionList
 
 LEVEL_TO_CONTINUE = 2  # UI level 3; the next review is in three days.
 DIRECTIONS: tuple[Direction, Direction] = ("en_ru", "ru_en")
@@ -141,7 +140,7 @@ class CohortService:
             current.requested_count += len(chosen)
         return self.read()
 
-    def next_question(self, direction: Direction) -> Question:
+    def questions(self, direction: Direction) -> QuestionList:
         now = datetime.now(timezone.utc)
         with SessionLocal() as session:
             repository = PracticeRepository(session)
@@ -156,14 +155,21 @@ class CohortService:
             }
             due_ids.update(row.word_id for row in rows if row.due_at <= now)
             words = self.vocabulary.batch(list(due_ids))
-            if not words:
-                raise DomainError(404, "Все карточки в этом направлении отложены до следующего повтора")
-            word = choose_word(words, progress, now)
-            return Question(
-                word_id=word.id,
-                english=word.english,
-                direction=direction,
-                prompt=word.english if direction == "en_ru" else word.translations[0],
-                part_of_speech=word.part_of_speech,
-                stage=progress[word.id].stage if word.id in progress else 0,
-            )
+            shuffle(words)
+            return QuestionList(items=[
+                Question(
+                    word_id=word.id,
+                    english=word.english,
+                    direction=direction,
+                    prompt=word.english if direction == "en_ru" else word.translations[0],
+                    part_of_speech=word.part_of_speech,
+                    stage=progress[word.id].stage if word.id in progress else 0,
+                )
+                for word in words
+            ])
+
+    def next_question(self, direction: Direction) -> Question:
+        questions = self.questions(direction).items
+        if not questions:
+            raise DomainError(404, "Все карточки в этом направлении отложены до следующего повтора")
+        return questions[0]

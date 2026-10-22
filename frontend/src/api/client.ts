@@ -62,16 +62,17 @@ export const api = {
   exportWords: () => request<{ words: WordInput[] }>("/words/export"),
   next: (direction: Direction) =>
     request<Question>(`/practice/next?direction=${direction}`),
+  round: (direction: Direction) => request<{ items: Question[] }>(`/practice/round?direction=${direction}`),
   cohort: () => request<Cohort>("/practice/cohort"),
   startCohort: (count: number) => request<Cohort>("/practice/cohort", json("POST", { count })),
   expandCohort: (count: number) => request<Cohort>("/practice/cohort/expand", json("POST", { count })),
   acceptAttempt: (id: string) => request<AnswerResult>(`/practice/attempts/${id}/accept`, { method: "POST" }),
   recheckAttempt: (id: string) => request<AnswerResult>(`/practice/attempts/${id}/recheck`, { method: "POST" }),
   deletePracticeWord: (id: string) => request<void>(`/practice/words/${id}`, { method: "DELETE" }),
-  answer: (word_id: string, direction: Direction, answer: string) =>
+  answer: (word_id: string, direction: Direction, answer: string, review_only = false) =>
     request<AnswerResult>(
       "/practice/answer",
-      json("POST", { word_id, direction, answer }),
+      json("POST", { word_id, direction, answer, review_only }),
     ),
   summary: () => request<PracticeSummary>("/practice/summary"),
   progress: () => request<{ items: Progress[] }>("/practice/progress"),
@@ -84,6 +85,7 @@ export const api = {
   insights: () =>
     request<Insights>(`/insights/summary?timezone=${encodeURIComponent(localTimezone())}`),
   reports: () => request<{ items: Report[] }>("/journal/reports"),
+  reportMonth: (year: number, month: number) => request<{ items: Report[] }>(`/journal/reports/calendar?year=${year}&month=${month}`),
   report: (date: string) => request<Report>(`/journal/reports/${date}`),
   saveReport: (date: string, report: ReportInput) =>
     request<Report>(`/journal/reports/${date}`, json("PUT", report)),

@@ -10,17 +10,25 @@ import {
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError } from "../api/client";
+import { ConfirmDeleteDialog } from "../components/ConfirmDeleteDialog";
 import { WordForm } from "../components/dictionary/WordForm";
 import { AnswerFeedback } from "../components/practice/AnswerFeedback";
 import { CohortPanel } from "../components/practice/CohortPanel";
 import { PronunciationButton } from "../components/practice/PronunciationButton";
+import { RoundSummary } from "../components/practice/RoundSummary";
 import type { AnswerResult, Cohort, Direction, Question, Word } from "../types";
 
 export function Practice() {
   const [direction, setDirection] = useState<Direction>("en_ru");
   const [question, setQuestion] = useState<Question | null>(null);
+  const [deck, setDeck] = useState<Question[]>([]);
+  const [position, setPosition] = useState(0);
+  const [roundAnswers, setRoundAnswers] = useState<boolean[]>([]);
+  const [previousPercent, setPreviousPercent] = useState<number | null>(null);
+  const [retry, setRetry] = useState(false);
   const [cohort, setCohort] = useState<Cohort | null>(null);
   const [editing, setEditing] = useState<Word | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<AnswerResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -31,27 +39,38 @@ export function Practice() {
   const nextRef = useRef<HTMLButtonElement>(null);
   const refreshCohort = async () => setCohort(await api.cohort());
 
-  const loadQuestion = async (selected: Direction) => {
+  const loadRound = async (selected: Direction) => {
     setBusy(true);
     setError("");
     setResult(null);
     setAnswer("");
     try {
-      setQuestion(await api.next(selected));
+      const response = await api.round(selected);
+      setDeck(response.items);
+      setPosition(0);
+      setRoundAnswers([]);
+      setPreviousPercent(null);
+      setRetry(false);
+      setQuestion(response.items[0] ?? null);
     } catch (e) {
       setQuestion(null);
+      setDeck([]);
       if (!(e instanceof ApiError && (e.status === 404 || e.status === 409))) {
         setError((e as Error).message);
       }
     } finally {
       setBusy(false);
-      setTimeout(() => inputRef.current?.focus(), 0);
     }
   };
   useEffect(() => {
     void refreshCohort().catch((e) => setError((e as Error).message));
-    void loadQuestion(direction);
+    void loadRound(direction);
   }, [direction]);
+  useEffect(() => {
+    if (!question || busy || result || editing) return;
+    const frame = window.requestAnimationFrame(() => inputRef.current?.focus());
+    return () => window.cancelAnimationFrame(frame);
+  }, [question, busy, result, editing]);
   useEffect(() => {
     if (result && !editing) window.setTimeout(() => nextRef.current?.focus(), 0);
   }, [result, editing]);
@@ -61,7 +80,7 @@ export function Practice() {
     setError("");
     try {
       setCohort(await api.startCohort(count));
-      await loadQuestion(direction);
+      await loadRound(direction);
     } catch (e) { setError(e instanceof ApiError && e.status === 422 && count === 0 ? "Укажи количество слов больше нуля" : (e as Error).message); }
     finally { setBusy(false); }
   };
@@ -71,7 +90,7 @@ export function Practice() {
     setError("");
     try {
       setCohort(await api.expandCohort(count));
-      await loadQuestion(direction);
+      await loadRound(direction);
     } catch (e) { setError(e instanceof ApiError && e.status === 422 && count === 0 ? "Укажи количество слов больше нуля" : (e as Error).message); }
     finally { setBusy(false); }
   };
@@ -86,8 +105,10 @@ export function Practice() {
         question.word_id,
         direction,
         answer.trim(),
+        retry,
       );
       setResult(response);
+      setRoundAnswers((current) => { const updated = [...current]; updated[position] = response.correct; return updated; });
       setDone((value) => value + 1);
       if (response.correct) setCorrect((value) => value + 1);
       await refreshCohort();
@@ -102,9 +123,12 @@ export function Practice() {
     if (!result || busy) return;
     setBusy(true);
     try {
-      const updated = await api.acceptAttempt(result.attempt_id);
+      const updated = result.attempt_id
+        ? await api.acceptAttempt(result.attempt_id)
+        : { ...result, correct: true };
       if (!result.correct && updated.correct) setCorrect((value) => value + 1);
       setResult(updated);
+      setRoundAnswers((current) => { const answers = [...current]; answers[position] = updated.correct; return answers; });
       await refreshCohort();
     } catch (e) { setError((e as Error).message); }
     finally { setBusy(false); }
@@ -118,32 +142,64 @@ export function Practice() {
   };
   const afterEdit = async () => {
     setEditing(null);
-    if (!result) { await loadQuestion(direction); return; }
+    if (!result) { await loadRound(direction); return; }
     try {
-      const updated = await api.recheckAttempt(result.attempt_id);
+      const updated = result.attempt_id
+        ? await api.recheckAttempt(result.attempt_id)
+        : await api.answer(question!.word_id, direction, answer.trim(), true);
       if (result.correct !== updated.correct) setCorrect((value) => value + (updated.correct ? 1 : -1));
       setResult(updated);
+      setRoundAnswers((current) => { const answers = [...current]; answers[position] = updated.correct; return answers; });
       if (question) {
         const word = await api.word(question.word_id);
-        setQuestion({ ...question, english: word.english, prompt: direction === "en_ru" ? word.english : word.translations[0] });
+        const updatedQuestion = { ...question, english: word.english,
+          prompt: direction === "en_ru" ? word.english : word.translations[0] };
+        setQuestion(updatedQuestion);
+        setDeck((current) => current.map((item) => item.word_id === question.word_id ? updatedQuestion : item));
       }
       await refreshCohort();
     } catch (e) { setError((e as Error).message); }
   };
   const remove = async () => {
-    if (!question || busy || !window.confirm(`Удалить «${question.english}» из словаря и из результатов?`)) return;
+    if (!question || busy) return;
     setBusy(true);
     try {
       await api.deletePracticeWord(question.word_id);
+      setConfirmDelete(false);
       if (result) {
         setDone((value) => Math.max(0, value - 1));
         if (result.correct) setCorrect((value) => Math.max(0, value - 1));
       }
       await refreshCohort();
-      await loadQuestion(direction);
+      const remaining = deck.filter((item) => item.word_id !== question.word_id);
+      const nextPosition = Math.min(position, remaining.length);
+      setDeck(remaining);
+      setPosition(nextPosition);
+      setRoundAnswers((current) => current.filter((_, index) => index !== position));
+      setQuestion(remaining[nextPosition] ?? null);
+      setResult(null);
+      setAnswer("");
     } catch (e) { setError((e as Error).message); }
     finally { setBusy(false); }
   };
+
+  const advance = () => {
+    const nextPosition = position + 1;
+    setPosition(nextPosition);
+    setQuestion(deck[nextPosition] ?? null);
+    setResult(null);
+    setAnswer("");
+  };
+  const retryRound = () => {
+    setPreviousPercent(deck.length ? Math.round(roundAnswers.filter(Boolean).length / deck.length * 100) : 0);
+    setRetry(true);
+    setPosition(0);
+    setRoundAnswers([]);
+    setQuestion(deck[0] ?? null);
+    setResult(null);
+    setAnswer("");
+  };
+  const finished = deck.length > 0 && position >= deck.length;
 
   return (
     <>
@@ -184,7 +240,13 @@ export function Practice() {
               </button>
             </div>
           </div>
-          {question ? (
+          {deck.length > 0 && !finished && <div className="round-progress">
+            <span>Круг {retry ? "· повтор" : "· первый проход"}</span>
+            <strong>{position + 1} / {deck.length}</strong>
+            <div><i style={{ width: `${position / deck.length * 100}%` }} /></div>
+          </div>}
+          {finished ? <RoundSummary total={deck.length} correct={roundAnswers.filter(Boolean).length}
+            previous={previousPercent} onRetry={retryRound} onNewRound={() => void loadRound(direction)} /> : question ? (
             <div className="question-card">
               <div className="question-top">
                 <span>
@@ -248,14 +310,14 @@ export function Practice() {
               {result && (
                 <div className="answer-actions">
                   {!result.correct && <button type="button" className="secondary-button" onClick={() => void accept()} disabled={busy}>Мой ответ верный</button>}
-                  <button ref={nextRef} type="button" className="next-button" onClick={() => void loadQuestion(direction)}>
-                    Следующее слово <ArrowRight size={18} />
+                  <button ref={nextRef} type="button" className="next-button" onClick={advance}>
+                    {position + 1 === deck.length ? "Завершить круг" : "Следующее слово"} <ArrowRight size={18} />
                   </button>
                 </div>
               )}
               <div className="practice-word-actions">
                 <button type="button" onClick={() => void openEdit()} disabled={busy}><Pencil size={15} /> Исправить слово</button>
-                <button type="button" onClick={() => void remove()} disabled={busy}><Trash2 size={15} /> Удалить слово</button>
+                <button type="button" onClick={() => { setError(""); setConfirmDelete(true); }} disabled={busy}><Trash2 size={15} /> Удалить слово</button>
               </div>
             </form>
           )}
@@ -303,13 +365,15 @@ export function Practice() {
           </div>
           {question && <button
             className="reset-link"
-            onClick={() => void loadQuestion(direction)}
+            onClick={() => void loadRound(direction)}
           >
-            <RotateCcw size={16} /> Другое слово
+            <RotateCcw size={16} /> Начать круг заново
           </button>}
         </aside>
       </div>
       {editing && <WordForm word={editing} onClose={() => setEditing(null)} onSaved={() => void afterEdit()} />}
+      {confirmDelete && question && <ConfirmDeleteDialog word={question.english} busy={busy} error={error}
+        onCancel={() => setConfirmDelete(false)} onConfirm={() => void remove()} />}
     </>
   );
 }

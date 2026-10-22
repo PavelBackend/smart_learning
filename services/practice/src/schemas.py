@@ -12,6 +12,7 @@ class AnswerInput(StrictModel):
     word_id: UUID
     direction: Direction
     answer: str = Field(min_length=1, max_length=500)
+    review_only: bool = False
 
     @field_validator("answer")
     @classmethod
@@ -49,8 +50,12 @@ class Question(StrictModel):
     stage: int = Field(ge=0, le=6)
 
 
+class QuestionList(StrictModel):
+    items: list[Question]
+
+
 class AnswerResult(StrictModel):
-    attempt_id: UUID
+    attempt_id: UUID | None
     correct: bool
     accepted: list[str] = Field(min_length=1)
     example: Example | None

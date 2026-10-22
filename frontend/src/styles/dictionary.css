@@ -152,6 +152,7 @@
   line-height: 1.5;
   margin-bottom: 14px;
 }
+.dictionary-example a, .example-source { display: block; margin-top: 5px; color: var(--accent-ink, #7152dd); font-size: 10px; font-style: normal; overflow-wrap: anywhere; }
 .dictionary-card-bottom {
   margin-top: auto;
   min-height: 29px;
@@ -307,3 +308,4 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+.dictionary-example a { display: inline-block; margin-left: 7px; color: var(--accent-ink, #7257d2); font-size: 9px; font-weight: 800; }

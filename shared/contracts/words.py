@@ -9,6 +9,13 @@ from shared.schemas import StrictModel
 class Example(StrictModel):
     en: str = Field(min_length=1, max_length=500)
     ru: str = Field(min_length=1, max_length=500)
+    source_url: str | None = Field(default=None, max_length=500)
+    license: str | None = Field(default=None, max_length=80)
+    attribution: str | None = Field(default=None, max_length=300)
+
+
+class ExampleEnrichment(StrictModel):
+    examples: list[Example] = Field(max_length=5)
 
 
 class WordInput(StrictModel):

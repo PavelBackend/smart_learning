@@ -1,11 +1,11 @@
-import { ArrowLeft, ArrowRight, BookOpen, Check, Clock3, Moon, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock3, Moon, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import { ReportSteps, reportSteps } from "../components/reports/ReportSteps";
 import { clearDraft, readDraft, saveDraft } from "../features/reports/draft";
 import type { Report, ReportInput } from "../types";
-import { formatReportDate, localDay, localTimezone, previousDay } from "../utils/localTime";
+import { formatReportDate, localDay, localTimezone } from "../utils/localTime";
 
 type Values = Omit<ReportInput, "timezone">;
 
@@ -29,7 +29,7 @@ function valuesFromReport(report: Report): Values {
 }
 
 export function DailyReport() {
-  const [search, setSearch] = useSearchParams();
+  const [search] = useSearchParams();
   const requestedDate = search.get("date");
   const today = localDay();
   const date = requestedDate && /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) && requestedDate <= today
@@ -40,21 +40,10 @@ export function DailyReport() {
   const [loadedDate, setLoadedDate] = useState<string | null>(null);
   const [draftActive, setDraftActive] = useState(false);
   const [existing, setExisting] = useState(false);
-  const [reports, setReports] = useState<Report[]>([]);
   const [todayWords, setTodayWords] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    api.reports().then((result) => {
-      if (active) setReports(result.items);
-    }).catch((failure: Error) => {
-      if (active) setError(failure.message);
-    });
-    return () => { active = false; };
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -113,7 +102,7 @@ export function DailyReport() {
     setSaving(true);
     setError("");
     try {
-      const report = await api.saveReport(date, {
+      await api.saveReport(date, {
         ...values,
         exercises: values.exercises.filter((exercise) => exercise.name.trim()),
         timezone: localTimezone(),
@@ -121,7 +110,6 @@ export function DailyReport() {
       clearDraft(date);
       setDraftActive(false);
       setExisting(true);
-      setReports((current) => [report, ...current.filter((item) => item.report_date !== date)]);
       setNotice("Запись сохранена. К ней можно вернуться в любой момент.");
     } catch (failure) {
       setError((failure as Error).message);
@@ -171,7 +159,7 @@ export function DailyReport() {
               <div className="journal-loading">Загружаем запись...</div>
             )}
             {error && <div className="alert">{error}</div>}
-            {notice && <div className="success-message"><Check size={17} /> {notice}</div>}
+            {notice && <div className="success-message"><Check size={17} /> {notice} <Link to={`/journal/report/${date}`}>Открыть отчёт</Link></div>}
             <div className="journal-actions">
               <span><Clock3 size={15} /> Черновик сохраняется автоматически</span>
               <div>
@@ -192,15 +180,7 @@ export function DailyReport() {
             <h3>Каждый день по-своему важен.</h3>
             <p>Все поля можно оставить пустыми. Запись сохраняется только после кнопки «Завершить запись».</p>
           </div>
-          <div className="journal-history">
-            <div className="journal-history-head"><BookOpen size={17} /><strong>Твои записи</strong></div>
-            <button type="button" className={date === today ? "selected" : ""} onClick={() => setSearch({ date: today })}>Сегодня <ArrowRight size={15} /></button>
-            <button type="button" className={date === previousDay() ? "selected" : ""} onClick={() => setSearch({ date: previousDay() })}>Вчера <ArrowRight size={15} /></button>
-            {reports.filter((report) => report.report_date !== today && report.report_date !== previousDay()).slice(0, 10).map((report) => (
-              <button type="button" key={report.report_date} className={date === report.report_date ? "selected" : ""} onClick={() => setSearch({ date: report.report_date })}>{formatReportDate(report.report_date)} <ArrowRight size={15} /></button>
-            ))}
-            <Link to="/">Вернуться на главную <ArrowRight size={15} /></Link>
-          </div>
+          <Link className="journal-calendar-link" to="/journal">Смотреть календарь <ArrowRight size={15} /></Link>
         </aside>
       </div>
     </div>

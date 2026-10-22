@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import ValidationError
 
 from shared.contracts.words import (
+    ExampleEnrichment,
     ImportResult,
     WordBatchInput,
     WordExport,
@@ -22,6 +23,22 @@ from ..repositories.words import WordRepository
 
 
 class WordService:
+    def enrich_examples(self, word_id: UUID, payload: ExampleEnrichment) -> WordRead:
+        with SessionLocal.begin() as session:
+            word = WordRepository(session).get(word_id)
+            if word is None:
+                raise DomainError(404, "Word not found")
+            existing = [example for example in word.examples if not example.get("source_url")]
+            external = [example for example in word.examples if example.get("source_url")]
+            seen = {example["en"].casefold() for example in existing + external}
+            for example in payload.examples:
+                if example.en.casefold() not in seen:
+                    external.append(example.model_dump())
+                    seen.add(example.en.casefold())
+            word.examples = external[:5] + existing
+            session.flush()
+            return WordRead.model_validate(word)
+
     def list(self, search: str, limit: int, offset: int) -> WordList:
         with SessionLocal() as session:
             words, total = WordRepository(session).list(search, limit, offset)

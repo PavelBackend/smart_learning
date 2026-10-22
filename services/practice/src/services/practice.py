@@ -32,6 +32,17 @@ class PracticeService:
         accepted = word.translations if payload.direction == "en_ru" else [word.english]
         correct = normalize_answer(payload.answer) in {normalize_answer(value) for value in accepted}
         now = datetime.now(timezone.utc)
+        if payload.review_only:
+            with SessionLocal() as session:
+                row = PracticeRepository(session).locked_progress(payload.word_id, payload.direction)
+                return AnswerResult(
+                    attempt_id=None,
+                    correct=correct,
+                    accepted=accepted,
+                    example=word.examples[0] if word.examples else None,
+                    stage=row.stage if row else 0,
+                    due_at=row.due_at if row else now,
+                )
         with SessionLocal.begin() as session:
             repository = PracticeRepository(session)
             row = repository.locked_progress(payload.word_id, payload.direction) or repository.add_progress(

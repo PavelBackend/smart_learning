@@ -7,6 +7,7 @@ PRE_COMMIT ?= .venv/bin/pre-commit
 up: migrate
 	$(COMPOSE) up -d --wait
 	@powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$$(wslpath -w scripts/Backup-Wordwell.ps1)" -InstallSchedule
+	@powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$$(wslpath -w scripts/Generate-UsAudio.ps1)" -InstallSchedule
 	@port="$$( $(COMPOSE) port frontend 80 | sed 's/.*://')"; printf '\nWordwell готов: http://localhost:%s\n' "$$port"
 
 infra:

@@ -35,7 +35,7 @@ export function DayPrompt() {
         <h2>{draft ? `Вернись к записи за ${formatReportDate(date)}` : "Как прошёл твой день?"}</h2>
         <p>{draft ? "Твой черновик ждёт тебя. Его можно закончить сегодня." : "Вспомни главное, отметь английский и тренировку."}</p>
       </div>
-      <Link to={`/journal?date=${date}`} className="day-prompt-link">
+      <Link to={`/journal/new?date=${date}`} className="day-prompt-link">
         {draft ? "Продолжить" : "Записать день"} <ArrowRight size={17} />
       </Link>
       <button

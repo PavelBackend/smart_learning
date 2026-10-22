@@ -28,7 +28,7 @@ export function WordForm({
   const updateExample = (index: number, field: keyof Example, value: string) =>
     setExamples((current) =>
       current.map((example, i) =>
-        i === index ? { ...example, [field]: value } : example,
+        i === index ? { ...example, [field]: value, source_url: null, license: null, attribution: null } : example,
       ),
     );
 
@@ -55,6 +55,9 @@ export function WordForm({
       examples: cleanedExamples.map((example) => ({
         en: example.en.trim(),
         ru: example.ru.trim(),
+        source_url: example.source_url ?? null,
+        license: example.license ?? null,
+        attribution: example.attribution ?? null,
       })),
       part_of_speech: part.trim() || null,
       note: note.trim() || null,
@@ -162,6 +165,9 @@ export function WordForm({
                   />
                 </label>
               </div>
+              {example.source_url && <a className="example-source" href={example.source_url} target="_blank" rel="noreferrer">
+                {example.attribution || "Источник"} · {example.license} ↗
+              </a>}
               {examples.length > 1 && (
                 <button
                   type="button"

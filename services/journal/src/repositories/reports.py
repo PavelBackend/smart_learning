@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from calendar import monthrange
 from datetime import date
 
 from sqlalchemy import select
@@ -17,6 +20,17 @@ class ReportRepository:
         return list(
             self.session.scalars(
                 select(DailyReport).order_by(DailyReport.report_date.desc()).limit(limit)
+            ).all()
+        )
+
+    def month(self, year: int, month: int) -> list[DailyReport]:
+        start = date(year, month, 1)
+        end = date(year, month, monthrange(year, month)[1])
+        return list(
+            self.session.scalars(
+                select(DailyReport)
+                .where(DailyReport.report_date.between(start, end))
+                .order_by(DailyReport.report_date)
             ).all()
         )
 

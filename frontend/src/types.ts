@@ -1,5 +1,5 @@
 export type Direction = "en_ru" | "ru_en";
-export type Example = { en: string; ru: string };
+export type Example = { en: string; ru: string; source_url?: string | null; license?: string | null; attribution?: string | null };
 export type WordInput = {
   english: string;
   translations: string[];
@@ -18,7 +18,7 @@ export type Question = {
   stage: number;
 };
 export type AnswerResult = {
-  attempt_id: string;
+  attempt_id: string | null;
   correct: boolean;
   accepted: string[];
   example: Example | null;

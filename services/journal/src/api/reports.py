@@ -15,6 +15,14 @@ def list_reports(limit: Annotated[int, Query(ge=1, le=365)] = 60) -> ReportList:
     return service.list(limit)
 
 
+@router.get("/calendar", response_model=ReportList)
+def calendar_reports(
+    year: Annotated[int, Query(ge=2000, le=2100)],
+    month: Annotated[int, Query(ge=1, le=12)],
+) -> ReportList:
+    return service.month(year, month)
+
+
 @router.get("/{report_date}", response_model=ReportRead)
 def get_report(report_date: date) -> ReportRead:
     return service.get(report_date)

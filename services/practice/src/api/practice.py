@@ -16,6 +16,7 @@ from ..schemas import (
     ProgressList,
     ProgressRead,
     Question,
+    QuestionList,
 )
 from ..services.cohort import CohortService
 from ..services.practice import PracticeService
@@ -41,6 +42,11 @@ def expand_cohort(payload: CohortInput) -> CohortRead:
 @router.get("/next", response_model=Question)
 def next_question(direction: Annotated[Direction, Query()] = "en_ru") -> Question:
     return CohortService().next_question(direction)
+
+
+@router.get("/round", response_model=QuestionList)
+def round_questions(direction: Annotated[Direction, Query()] = "en_ru") -> QuestionList:
+    return CohortService().questions(direction)
 
 
 @router.post("/answer", response_model=AnswerResult)
